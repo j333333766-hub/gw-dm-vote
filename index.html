@@ -48,6 +48,10 @@ footer a{color:var(--sub)}
 .tl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chips span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
 .last{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:12px;font-weight:700;vertical-align:1px;white-space:nowrap}
+.nidbox{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.nidbox:focus-within{outline:2px solid var(--brand);outline-offset:1px}
+.nidbox .pre{display:flex;align-items:center;padding:0 12px;font-weight:700;font-size:17px;color:var(--ink);background:var(--soft);border-right:1px solid var(--line)}
+.nidbox input{border:0;border-radius:0;outline:none!important;letter-spacing:2px}
 .texts p{background:var(--bg);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-line}
 </style>
 </head>
@@ -69,7 +73,7 @@ footer a{color:var(--sub)}
       <h2>1. 본인 확인</h2>
       <form id="fVerify" autocomplete="off">
         <label class="f" for="nid">나이스 개인번호</label>
-        <input type="password" id="nid" maxlength="14" placeholder="E로 시작하는 10자리" autocapitalize="characters">
+        <div class="nidbox"><span class="pre">E</span><input type="password" id="nid" maxlength="9" inputmode="numeric" pattern="[0-9]*" placeholder="E 뒤 숫자 9자리" autocomplete="off"></div>
         <div class="hint">개인번호는 본인 확인에만 쓰이고, 투표 내용과 함께 저장되지 않아요.</div>
         <button class="btn" id="bVerify" type="submit">확인</button>
       </form>
@@ -124,7 +128,7 @@ let CFG = null, TOKEN = '', ANS = {};
 
 const ERR = {
   nomatch: '등록된 나이스 개인번호가 아니에요. 다시 확인해 주세요.',
-  nid: '나이스 개인번호를 확인해 주세요. (E로 시작하는 10자리)',
+  nid: 'E 뒤의 숫자 9자리를 입력해 주세요.',
   name: '이름을 확인해 주세요.',
   noright: '이번 투표 대상(재직 중인 교원)이 아니에요. 잘못되었다면 교무기획부에 알려 주세요.',
   locked: '확인 실패가 많아 본인 확인을 10분 동안 막았어요. 잠시 뒤 다시 해 주세요.',
@@ -172,10 +176,13 @@ async function boot() {
   if (CFG.state !== 'open') { msg('mVerify', errText(CFG.state), 'info'); }
 }
 
+// 숫자만 남긴다 (E 를 같이 쳐도 지워짐)
+$('nid').addEventListener('input', () => { const v = $('nid').value.replace(/\D/g, '').slice(0, 9); if (v !== $('nid').value) $('nid').value = v; });
 $('fVerify').addEventListener('submit', async (e) => {
   e.preventDefault(); msg('mVerify', '');
-  const nid = $('nid').value.trim();
-  if (!/^[A-Za-z0-9-\s]{6,14}$/.test(nid)) return msg('mVerify', ERR.nid);
+  const digits = $('nid').value.replace(/\D/g, '');
+  if (digits.length !== 9) return msg('mVerify', ERR.nid);
+  const nid = 'E' + digits;
   $('bVerify').disabled = true; $('bVerify').textContent = '확인 중…';
   const r = await call('verify', { nid });
   $('bVerify').disabled = false; $('bVerify').textContent = '확인';
