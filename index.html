@@ -180,10 +180,10 @@ $('fVerify').addEventListener('submit', async (e) => {
   const r = await call('verify', { nid });
   $('bVerify').disabled = false; $('bVerify').textContent = '확인';
   if (!r.ok) return msg('mVerify', errText(r.error));
-  if (r.result.voted) return msg('mVerify', `${r.result.name} 선생님은 이미 투표하셨어요. 고맙습니다.`, 'ok');
+  if (r.result.voted) return msg('mVerify', '이미 투표를 마친 번호예요. 참여해 주셔서 고맙습니다.', 'ok');
   if (CFG.state !== 'open') return msg('mVerify', errText(CFG.state), 'info');
   TOKEN = r.result.token; $('nid').value = '';
-  $('who').textContent = `· ${r.result.name} 선생님`;
+  $('who').textContent = '· 무기명';
   renderQs(); show('stepVerify', false); show('stepBallot'); window.scrollTo({ top: $('stepBallot').offsetTop - 12, behavior: 'smooth' });
 });
 
