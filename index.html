@@ -52,6 +52,11 @@ footer a{color:var(--sub)}
 .nidbox:focus-within{outline:2px solid var(--brand);outline-offset:1px}
 .nidbox .pre{display:flex;align-items:center;padding:0 12px;font-weight:700;font-size:17px;color:var(--ink);background:var(--soft);border-right:1px solid var(--line)}
 .nidbox input{border:0;border-radius:0;outline:none!important;letter-spacing:2px}
+.opt .ot{display:block;flex:1;min-width:0}.opt .ot b{font-weight:600}
+.opt small{display:block;color:var(--sub);font-size:13px;line-height:1.5;margin-top:3px;word-break:keep-all}
+.opt input.custom{display:block;margin-top:8px;width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.opt input.custom:disabled{opacity:.45}
+.q .desc{white-space:pre-line}
 .texts p{background:var(--bg);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-line}
 </style>
 </head>
@@ -125,6 +130,7 @@ const $ = (id) => document.getElementById(id);
 const show = (id, on = true) => $(id).classList.toggle('hidden', !on);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let CFG = null, TOKEN = '', ANS = {};
+const CUSTOM = '직접 입력';
 
 const ERR = {
   nomatch: '등록된 나이스 개인번호가 아니에요. 다시 확인해 주세요.',
@@ -139,8 +145,8 @@ const ERR = {
   pw: '비밀번호가 맞지 않아요.', network: '연결이 잘 안 돼요. 잠시 뒤 다시 해 주세요.', server: '서버에 문제가 생겼어요. 교무기획부에 알려 주세요.'
 };
 function errText(code) {
-  const m = String(code).match(/^(need|option|one|max|alone):(.+)$/);
-  if (m) return { need: `${m[2]}번 문항에 답해 주세요.`, option: `${m[2]}번 문항의 선택지가 바뀌었어요. 새로 고침 해 주세요.`, one: `${m[2]}번은 하나만 고를 수 있어요.`, max: `${m[2]}번은 고를 수 있는 개수를 넘었어요.`, alone: `${m[2]}번에서 '없음'은 다른 것과 함께 고를 수 없어요.` }[m[1]];
+  const m = String(code).match(/^(need|option|one|max|alone|custom):(.+)$/);
+  if (m) return { need: `${m[2]}번 문항에 답해 주세요.`, option: `${m[2]}번 문항의 선택지가 바뀌었어요. 새로 고침 해 주세요.`, one: `${m[2]}번은 하나만 고를 수 있어요.`, max: `${m[2]}번은 고를 수 있는 개수를 넘었어요.`, alone: `${m[2]}번에서 '없음'은 다른 것과 함께 고를 수 없어요.`, custom: `${m[2]}번 '직접 입력' 칸에 내용을 적어 주세요.` }[m[1]];
   return ERR[code] || `문제가 생겼어요 (${code})`;
 }
 function msg(id, text, kind = 'err') { $(id).innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ''; }
@@ -201,9 +207,12 @@ function renderQs() {
     const type = q.kind === 'multi' ? 'checkbox' : 'radio';
     const note = q.kind === 'multi' ? `<p class="desc">여러 개 고를 수 있어요${q.max ? ` (최대 ${q.max}개)` : ''}.</p>` : '';
     return `<div class="q" data-no="${esc(q.no)}">${h}${note}` + q.options.map((o, i) =>
-      `<label class="opt"><input type="${type}" name="q${esc(q.no)}" value="${esc(o)}"><span>${esc(o)}${(q.last || []).includes(o) ? '<span class="last">2025학년도 방식</span>' : ''}</span></label>`).join('') + '</div>';
+      `<label class="opt"><input type="${type}" name="q${esc(q.no)}" value="${esc(o)}"><span class="ot"><b>${esc(o)}</b>${(q.last || []).includes(o) ? '<span class="last">2025학년도 방식</span>' : ''}`
+      + ((q.details || [])[i] ? `<small>${esc(q.details[i])}</small>` : '')
+      + (o === CUSTOM ? `<input type="text" class="custom" data-no="${esc(q.no)}" maxlength="60" placeholder="예: 11명" disabled>` : '')
+      + `</span></label>`).join('') + '</div>';
   }).join('');
-  $('qs').querySelectorAll('input').forEach((inp) => inp.addEventListener('change', () => {
+  $('qs').querySelectorAll('input[name]').forEach((inp) => inp.addEventListener('change', () => {
     const box = inp.closest('.q'), q = CFG.questions.find((x) => x.no === box.dataset.no);
     if (q.kind === 'multi' && inp.checked) {
       const alone = /없음/.test(inp.value);
@@ -212,8 +221,9 @@ function renderQs() {
       if (q.max && n > q.max) { inp.checked = false; msg('mBallot', `최대 ${q.max}개까지 고를 수 있어요.`); }
     }
     box.querySelectorAll('.opt').forEach((l) => l.classList.toggle('on', l.querySelector('input').checked));
-  }));
-}
+    const c = box.querySelector('input.custom');
+    if (c) { const on = box.querySelector(`input[value="${CUSTOM}"]`).checked; c.disabled = !on; if (on) c.focus(); }
+  }));}
 
 function collect() {
   const a = {};
@@ -221,6 +231,12 @@ function collect() {
     if (q.kind === 'text') a[q.no] = $('qs').querySelector(`textarea[data-no="${CSS.escape(q.no)}"]`).value.trim();
     else {
       const v = [...$('qs').querySelectorAll(`input[name="q${CSS.escape(q.no)}"]:checked`)].map((x) => x.value);
+      const ci = v.indexOf(CUSTOM);
+      if (ci >= 0) {
+        const t = $('qs').querySelector(`input.custom[data-no="${CSS.escape(q.no)}"]`).value.trim();
+        if (!t) return { err: q.no, code: 'custom' };
+        v[ci] = `${CUSTOM}: ${t}`;
+      }
       a[q.no] = q.kind === 'multi' ? v : (v[0] || '');
     }
     const empty = Array.isArray(a[q.no]) ? !a[q.no].length : !a[q.no];
@@ -232,7 +248,7 @@ function collect() {
 $('fBallot').addEventListener('submit', (e) => {
   e.preventDefault(); msg('mBallot', '');
   const c = collect();
-  if (c.err) { msg('mBallot', errText('need:' + c.err)); document.querySelector(`.q[data-no="${CSS.escape(c.err)}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  if (c.err) { msg('mBallot', errText((c.code || 'need') + ':' + c.err)); document.querySelector(`.q[data-no="${CSS.escape(c.err)}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
   ANS = c.a;
   $('sum').innerHTML = CFG.questions.map((q) => {
     const v = ANS[q.no]; const t = Array.isArray(v) ? v.join(', ') : v;
@@ -273,7 +289,8 @@ async function loadAdmin() {
     return `<div class="card"><h2>${esc(q.no)}. ${esc(q.title)}</h2>` + q.options.map((o) => {
       const p = tot ? Math.round(o.count / tot * 100) : 0;
       return `<div class="tl"><span>${esc(o.label)}${(q.last || []).includes(o.label) ? '<span class="last">2025학년도 방식</span>' : ''}</span><b>${o.count}표</b></div><div class="bar"><i style="width:${p}%"></i></div>`;
-    }).join('') + (q.kind === 'multi' ? `<div class="hint">응답 ${tot}명 기준 (여러 개 선택)</div>` : '') + '</div>';
+    }).join('') + (q.kind === 'multi' ? `<div class="hint">응답 ${tot}명 기준 (여러 개 선택)</div>` : '')
+      + ((q.customs || []).length ? `<div class="hint">직접 입력한 내용</div><div class="chips">${q.customs.map((t) => `<span>${esc(t)}</span>`).join('')}</div>` : '') + '</div>';
   }).join('');
   $('admView').innerHTML = h;
   $('bRe').addEventListener('click', loadAdmin);
