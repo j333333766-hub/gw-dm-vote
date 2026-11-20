@@ -47,6 +47,7 @@ footer a{color:var(--sub)}
 .bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:var(--brand)}
 .tl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chips span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
+.last{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:12px;font-weight:700;vertical-align:1px;white-space:nowrap}
 .texts p{background:var(--bg);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-line}
 </style>
 </head>
@@ -196,7 +197,7 @@ function renderQs() {
     const type = q.kind === 'multi' ? 'checkbox' : 'radio';
     const note = q.kind === 'multi' ? `<p class="desc">여러 개 고를 수 있어요${q.max ? ` (최대 ${q.max}개)` : ''}.</p>` : '';
     return `<div class="q" data-no="${esc(q.no)}">${h}${note}` + q.options.map((o, i) =>
-      `<label class="opt"><input type="${type}" name="q${esc(q.no)}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join('') + '</div>';
+      `<label class="opt"><input type="${type}" name="q${esc(q.no)}" value="${esc(o)}"><span>${esc(o)}${(q.last || []).includes(o) ? '<span class="last">2025학년도 방식</span>' : ''}</span></label>`).join('') + '</div>';
   }).join('');
   $('qs').querySelectorAll('input').forEach((inp) => inp.addEventListener('change', () => {
     const box = inp.closest('.q'), q = CFG.questions.find((x) => x.no === box.dataset.no);
@@ -267,7 +268,7 @@ async function loadAdmin() {
     const tot = q.kind === 'multi' ? (q.answered || 0) : q.options.reduce((s, o) => s + o.count, 0);
     return `<div class="card"><h2>${esc(q.no)}. ${esc(q.title)}</h2>` + q.options.map((o) => {
       const p = tot ? Math.round(o.count / tot * 100) : 0;
-      return `<div class="tl"><span>${esc(o.label)}</span><b>${o.count}표</b></div><div class="bar"><i style="width:${p}%"></i></div>`;
+      return `<div class="tl"><span>${esc(o.label)}${(q.last || []).includes(o.label) ? '<span class="last">2025학년도 방식</span>' : ''}</span><b>${o.count}표</b></div><div class="bar"><i style="width:${p}%"></i></div>`;
     }).join('') + (q.kind === 'multi' ? `<div class="hint">응답 ${tot}명 기준 (여러 개 선택)</div>` : '') + '</div>';
   }).join('');
   $('admView').innerHTML = h;
