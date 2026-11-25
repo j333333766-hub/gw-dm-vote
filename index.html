@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>다면평가자 선정 투표</title>
+<title>다면평가자 선정 투표 (참고용)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{--bg:#f4f6f9;--card:#fff;--ink:#1d2433;--sub:#5d6678;--line:#e1e5ec;--brand:#2453c7;--brand-ink:#fff;--soft:#eaf0fd;--ok:#1f8a4c;--okbg:#e6f5ec;--warn:#b25b00;--warnbg:#fff3e0;--bad:#c62828;--badbg:#fdecec}
@@ -61,7 +61,7 @@ footer a{color:var(--sub)}
 .more summary{list-style:none;cursor:pointer;padding:14px 18px;font-weight:700;font-size:15.5px;color:var(--brand);display:flex;justify-content:space-between;align-items:center;gap:8px}
 .more summary::-webkit-details-marker{display:none}
 .more summary .tap{flex:none;font-size:12.5px;font-weight:600;color:var(--brand);border:1px solid var(--brand);border-radius:999px;padding:1px 9px}
-.more summary .tap::after{content:'눌러서 보기'}.more[open] summary .tap::after{content:'접기'}
+.more summary .tap::after{content:'펼치기'}.more[open] summary .tap::after{content:'접기'}
 .more[open] summary{border-bottom:1px solid var(--line)}
 .more-body{padding:4px 18px 16px;font-size:14.5px}
 .more-body h4{font-size:15px;margin:16px 0 6px}
@@ -105,13 +105,14 @@ footer a{color:var(--sub)}
     <div class="meta"><span id="badge" class="badge b-wait">불러오는 중</span><span id="period"></span><span id="turnout"></span></div>
   </header>
 
+  <div class="card msg info" style="margin-top:14px">👀 <b>참고용 화면</b>이에요. 실제 투표는 진행하지 않았고, 투표 안내와 문항을 모두 펼쳐 두었어요. 원래는 나이스 개인번호로 본인 확인을 한 뒤 아래 문항에 답하도록 만들었어요. 선택지를 눌러 볼 수는 있지만 저장되지 않아요.</div>
   <div id="loading" class="card center">불러오는 중이에요…</div>
 
   <!-- 투표 -->
   <section id="vote" class="hidden">
     <div class="card guide" id="guide"></div>
 
-    <details class="card more" id="useInfo">
+    <details class="card more" id="useInfo" open>
       <summary>📌 다면평가 결과는 어디에 쓰이나요? <span class="tap"></span></summary>
       <div class="more-body">
         <h4>1. 다면평가는 두 가지로 합니다</h4>
@@ -134,12 +135,13 @@ footer a{color:var(--sub)}
       </div>
     </details>
 
-    <div class="card" id="stepVerify">
+    <div class="card hidden" id="stepVerify">
       <h2>본인 확인</h2>
       <form id="fVerify" autocomplete="off">
         <label class="f" for="nid">나이스 개인번호</label>
         <div class="nidbox"><span class="pre">E</span><input type="text" id="nid" maxlength="9" inputmode="numeric" pattern="[0-9]*" placeholder="E 뒤 숫자 9자리" autocomplete="off"></div>
         <div class="hint">개인번호는 본인 확인에만 쓰이고, 투표 내용과 함께 저장되지 않아요.</div>
+        <div class="msg info">예시 화면에서는 비워 두고 [확인]을 누르면 돼요.</div>
         <button class="btn" id="bVerify" type="submit">확인</button>
       </form>
       <div id="mVerify"></div>
@@ -147,7 +149,7 @@ footer a{color:var(--sub)}
 
     <div class="card hidden" id="stepBallot">
       <form id="fBallot"><div id="qs"></div>
-        <button class="btn" type="submit">다음: 고른 내용 확인</button>
+        
       </form>
       <div id="mBallot"></div>
     </div>
@@ -164,6 +166,8 @@ footer a{color:var(--sub)}
       <div class="big">✓</div>
       <h2 style="margin-top:12px">투표가 끝났어요</h2>
       <p class="hint">참여해 주셔서 고맙습니다. 결과는 다면평가관리위원회에서 확인한 뒤 안내해 드려요.</p>
+      <p class="hint">(예시 화면이라 실제로 저장되지는 않았어요.)</p>
+      <button class="btn ghost" type="button" onclick="location.reload()">처음부터 다시 보기</button>
     </div>
   </section>
 
@@ -178,13 +182,13 @@ footer a{color:var(--sub)}
     <div id="admView" class="hidden"></div>
   </section>
 
-  <footer><a href="?admin" id="admLink">관리자</a></footer>
+  <footer><span id="admLink">참고용 화면 · 저장되지 않음</span></footer>
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxkwzKGcq4EG9DIWqHJKlNrIZ-0qFWrDJLqGnWLlj8fRYoF7NG2toC0TStH-qcWJjPihA/exec';
+const API_URL = '';
 const API = new URLSearchParams(location.search).get('api') || API_URL;
-const isAdmin = new URLSearchParams(location.search).has('admin');
+const isAdmin = false;
 const $ = (id) => document.getElementById(id);
 const show = (id, on = true) => $(id).classList.toggle('hidden', !on);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -242,7 +246,15 @@ function errText(code) {
 function msg(id, text, kind = 'err') { $(id).innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ''; }
 
 // Apps Script 는 text/plain 으로 보내야 브라우저 사전 확인(CORS) 없이 받는다
+const DEMO_CFG = {"title": "2026 다면평가자 선정 기준 의견 투표 (1차)", "guide": "【다면평가자란?】 정규교사의 1년 근무를 동료 교사가 함께 평가하는 제도가 다면평가이고, 그 평가를 맡는 교사가 다면평가자입니다. 다면평가자는 12월에 동료 교사들의 자기실적평가서를 보고 평가합니다.\n\n【이번 투표는?】 다면평가자를 \"어떤 방식으로 구성하고, 어떻게 추천할지\" 선생님들의 의견을 묻는 1차 투표입니다. 결과를 바탕으로 다면평가관리위원회가 기준을 정하고, 이어서 2차 투표로 실제 평가자를 추천받습니다.\n\n【이미 정해진 기준(법령)】\n· 본교에서 실제 근무한 기간이 10개월 이상인 정규교사만 평가자가 될 수 있음\n· 휴직·파견·직위해제·징계 중인 교사, 기간제교사 등은 평가자가 될 수 없음\n· 다면평가관리위원회 위원장(교감)은 평가자가 될 수 없음\n· 평가 대상이 36명 이상이면 평가자는 8명 이상 (올해 평가 대상은 약 41명)\n\n투표는 1인 1회, 무기명입니다. 누가 투표했는지와 무엇을 골랐는지는 따로 저장되어 서로 연결되지 않습니다.", "state": "open", "opensAt": null, "closesAt": null, "questions": [{"no": "1", "kind": "single", "title": "다면평가자를 어떤 방식으로 구성할까요?", "desc": "선택지마다 평가자 자리 구성(색 칸)과, 2차 추천 투표에서 한 사람이 추천할 칸을 함께 보여 드려요. 세 방식 모두 교무기획부장이 평가자로 들어갑니다.\n2차 투표에서는 자리마다 추천을 많이 받은 순으로 2배수(9명이면 18명, 10명이면 20명) 후보를 정하고, 그중에서 교장선생님이 최종 평가자를 정합니다(교육청 시행계획의 선정 절차 예시). 추천할 수 있는 선생님은 본교에서 10개월 이상 근무한 정규교사입니다.", "options": ["영역별 대표 방식", "경력별 대표 방식", "교과군별 대표 방식"], "details": ["【구성】 교무기획부장 1(고정) + 부장 대표 2 + 1학년 담임 대표 1 + 2학년 담임 대표 1 + 3학년 담임 대표 1 + 비담임 대표 1 + 남교사 대표 1 + 여교사 대표 1 = 9명 【2차 추천】 부장 중 1명 / 1학년 담임 중 1명 / 2학년 담임 중 1명 / 3학년 담임 중 1명 / 비담임 중 1명 / 나와 같은 성별에서 1명 = 6명 【참고】 부장(학년부장 포함)과 담임을 겸하는 분은 없습니다. 평가자가 될 수 있는 정규교사 41명은 부장 10명, 1학년 담임 6명, 2학년 담임 8명, 3학년 담임 7명, 비담임(부장 제외) 10명입니다. 남교사 대표는 남교사들의, 여교사 대표는 여교사들의 추천으로 정합니다. 같은 분이 영역 대표와 남·여교사 대표에 함께 뽑히면 영역 대표로 정하고, 남·여교사 대표는 다음 순위로 넘깁니다.", "【구성】 교무기획부장 1(고정) + 경력 10년 이하 3 + 경력 11~20년 2 + 경력 21년 이상 2 + 남교사 대표 1 + 여교사 대표 1 = 10명 【2차 추천】 경력 10년 이하에서 1명 / 11~20년에서 1명 / 21년 이상에서 1명 / 나와 같은 성별에서 1명 = 4명 【참고】 경력 대표 7자리는 추천 대상 정규교사 41명의 교육경력 분포(10년 이하 19명, 11~20년 13명, 21년 이상 9명)에 비례합니다. 남교사 대표는 남교사들의, 여교사 대표는 여교사들의 추천으로 정합니다. 같은 분이 경력 대표와 남·여교사 대표에 함께 뽑히면 경력 대표로 정하고, 남·여교사 대표는 다음 순위로 넘깁니다.", "【구성】 교무기획부장 1(고정) + 인문·사회 3 + 수리·과학·기술 2 + 예체능 1 + 비교과·특수 1 + 남교사 대표 1 + 여교사 대표 1 = 10명 【2차 추천】 인문·사회에서 1명 / 수리·과학·기술에서 1명 / 예체능에서 1명 / 비교과·특수에서 1명 / 나와 같은 성별에서 1명 = 5명 【참고】 인문·사회=국어·영어·역사·사회·지리·도덕·한문(15명), 수리·과학·기술=수학·과학·기술·가정·정보(13명), 예체능=체육·미술·음악(8명), 비교과·특수=특수·진로·보건·상담(5명). 교과군 대표 7자리는 이 인원에 비례합니다. 남교사 대표는 남교사들의, 여교사 대표는 여교사들의 추천으로 정합니다. 같은 분이 교과군 대표와 남·여교사 대표에 함께 뽑히면 교과군 대표로 정하고, 남·여교사 대표는 다음 순위로 넘깁니다."], "required": true, "max": 0, "last": ["영역별 대표 방식"]}, {"no": "2", "kind": "text", "title": "그 밖에 의견이 있으면 적어 주세요.", "desc": "", "options": [], "details": [], "required": false, "max": 0, "last": []}], "eligible": null, "voted": 0};
 async function call(action, data = {}) {
+  await new Promise((r) => setTimeout(r, 250));
+  if (action === 'config') return { ok: true, result: JSON.parse(JSON.stringify(DEMO_CFG)) };
+  if (action === 'verify') return { ok: true, result: { token: 'demo', voted: false } };
+  if (action === 'vote') return { ok: true, result: {} };
+  return { ok: false, error: 'server' };
+}
+async function callServerUnused(action, data = {}) {
   if (!API) return { ok: false, error: 'server' };
   let res;
   try { res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...data }), redirect: 'follow' }); }
@@ -255,7 +267,7 @@ function head(c) {
   $('title').textContent = c.title || '다면평가자 선정 투표';
   document.title = c.title || document.title;
   const b = $('badge');
-  const map = { open: ['투표 중', 'b-open'], notyet: ['시작 전', 'b-wait'], ended: ['마감', 'b-off'], closed: ['닫힘', 'b-off'] };
+  const map = { open: ['참고용', 'b-wait'], notyet: ['시작 전', 'b-wait'], ended: ['마감', 'b-off'], closed: ['닫힘', 'b-off'] };
   const [t, cls] = map[c.state] || ['', 'b-wait']; b.textContent = t; b.className = 'badge ' + cls;
   $('period').textContent = (c.opensAt || c.closesAt) ? `${fmt(c.opensAt) || '지금'} ~ ${fmt(c.closesAt) || ''}` : '';
   if (c.eligible != null) $('turnout').textContent = `참여 ${c.voted}/${c.eligible}명`;
@@ -269,7 +281,7 @@ async function boot() {
   CFG = r.result; head(CFG);
   $('guide').textContent = CFG.guide;
   show('vote');
-  if (CFG.state !== 'open') { msg('mVerify', errText(CFG.state), 'info'); }
+  renderQs(); show('stepBallot');
 }
 
 // 숫자만 남긴다 (E 를 같이 쳐도 지워짐)
@@ -277,7 +289,6 @@ $('nid').addEventListener('input', () => { const v = $('nid').value.replace(/\D/
 $('fVerify').addEventListener('submit', async (e) => {
   e.preventDefault(); msg('mVerify', '');
   const digits = $('nid').value.replace(/\D/g, '');
-  if (digits.length !== 9) return msg('mVerify', ERR.nid);
   const nid = 'E' + digits;
   $('bVerify').disabled = true; $('bVerify').textContent = '확인 중…';
   const r = await call('verify', { nid });
