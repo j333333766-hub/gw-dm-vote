@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>다면평가자 선정 투표 (예시)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1d2433;--sub:#5d6678;--line:#e1e5ec;--brand:#2453c7;--brand-ink:#fff;--soft:#eaf0fd;--ok:#1f8a4c;--okbg:#e6f5ec;--warn:#b25b00;--warnbg:#fff3e0;--bad:#c62828;--badbg:#fdecec}
+@media (prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1b2029;--ink:#e8ebf1;--sub:#a3abba;--line:#2c3340;--brand:#6f9bff;--brand-ink:#0d1220;--soft:#1f2a44;--ok:#5fd18f;--okbg:#14301f;--warn:#ffb35c;--warnbg:#33240f;--bad:#ff7b7b;--badbg:#3a1717}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Malgun Gothic",sans-serif;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+header h1{font-size:21px;margin:4px 0 6px;line-height:1.35;word-break:keep-all}
+.school{color:var(--sub);font-size:14px;font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 4px;font-size:14px;color:var(--sub)}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.b-open{background:var(--okbg);color:var(--ok)}.b-wait{background:var(--warnbg);color:var(--warn)}.b-off{background:var(--badbg);color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.guide{white-space:pre-line;font-size:14.5px;color:var(--sub)}
+h2{font-size:17px;margin:0 0 12px}
+label.f{display:block;font-weight:600;margin:12px 0 6px;font-size:15px}
+input[type=text],input[type=password],textarea{width:100%;font:inherit;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px}
+.hint{font-size:13px;color:var(--sub);margin-top:4px}
+button{font:inherit;cursor:pointer}
+.btn{display:block;width:100%;margin-top:16px;padding:13px;border:0;border-radius:10px;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:16px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}
+.row2{display:flex;gap:10px}.row2 .btn{margin-top:16px}
+.q{border-top:1px solid var(--line);padding:16px 0 4px}.q:first-of-type{border-top:0;padding-top:0}
+.q h3{font-size:16px;margin:0 0 4px;word-break:keep-all}
+.q .no{color:var(--brand);margin-right:4px}
+.req{color:var(--bad);font-size:13px;margin-left:4px}
+.q .desc{font-size:13.5px;color:var(--sub);margin:0 0 8px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin:8px 0;cursor:pointer;background:var(--bg)}
+.opt input{margin-top:4px;width:18px;height:18px;flex:none;accent-color:var(--brand)}
+.opt.on{border-color:var(--brand);background:var(--soft)}
+.msg{padding:11px 13px;border-radius:10px;margin-top:12px;font-size:14.5px}
+.msg.err{background:var(--badbg);color:var(--bad)}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.info{background:var(--soft);color:var(--ink)}
+.sum dt{font-weight:700;font-size:14px;margin-top:10px}.sum dd{margin:2px 0 0;color:var(--sub);font-size:14.5px}
+.center{text-align:center}.big{font-size:44px;line-height:1}
+.hidden{display:none!important}
+footer{text-align:center;font-size:12.5px;color:var(--sub);margin-top:28px}
+footer a{color:var(--sub)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:var(--brand)}
+.tl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chips span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
+.last{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:12px;font-weight:700;vertical-align:1px;white-space:nowrap}
+.nidbox{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.nidbox:focus-within{outline:2px solid var(--brand);outline-offset:1px}
+.nidbox .pre{display:flex;align-items:center;padding:0 12px;font-weight:700;font-size:17px;color:var(--ink);background:var(--soft);border-right:1px solid var(--line)}
+.nidbox input{border:0;border-radius:0;outline:none!important;letter-spacing:2px}
+.opt .ot{display:block;flex:1;min-width:0}.opt .ot b{font-weight:600}
+.opt small{display:block;color:var(--sub);font-size:13px;line-height:1.5;margin-top:3px;word-break:keep-all}
+.opt input.custom{display:block;margin-top:8px;width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.opt input.custom:disabled{opacity:.45}
+.q .desc{white-space:pre-line}
+.more{padding:0;overflow:hidden}
+.more summary{list-style:none;cursor:pointer;padding:14px 18px;font-weight:700;font-size:15.5px;color:var(--brand);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.more summary::-webkit-details-marker{display:none}
+.more summary .tap{flex:none;font-size:12.5px;font-weight:600;color:var(--brand);border:1px solid var(--brand);border-radius:999px;padding:1px 9px}
+.more summary .tap::after{content:'눌러서 보기'}.more[open] summary .tap::after{content:'접기'}
+.more[open] summary{border-bottom:1px solid var(--line)}
+.more-body{padding:4px 18px 16px;font-size:14.5px}
+.more-body h4{font-size:15px;margin:16px 0 6px}
+.more-body ul{margin:0;padding-left:18px}.more-body li{margin:4px 0}
+.more-body p{margin:6px 0}
+.mini{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+.mini th,.mini td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.mini th{background:var(--bg);white-space:nowrap}.mini td.n{text-align:right;white-space:nowrap;font-weight:700}
+.mini tr.t th,.mini tr.t td{background:var(--soft)}
+.more .src{font-size:12.5px;color:var(--sub);margin-top:12px}
+.school{display:flex;align-items:center;gap:8px}
+.school .emblem{width:28px;height:28px;flex:none}
+/* 구성 방식 선택지: 자리 칸·범례·추천 칸 */
+:root{--s0:#9aa3b5;--s1:#2f6fdb;--s2:#e07b39;--s3:#2a9d8f;--s4:#8e5cd9;--s5:#c99400;--s6:#3f8f3a;--sm:#8d6e63;--sf:#d0567f}
+@media (prefers-color-scheme:dark){:root{--s0:#6c7487;--s1:#6f9bff;--s2:#ff9f5c;--s3:#4fc4b5;--s4:#b58cff;--s5:#f0c040;--s6:#6fcf68;--sm:#c4a295;--sf:#ff8fb5}}
+.opt.rich{flex-direction:row}
+.rh{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.rh b{font-size:16px}
+.total{margin-left:auto;font-weight:800;font-size:15px;color:var(--brand);background:var(--soft);border-radius:999px;padding:1px 10px}
+.seats{display:flex;gap:3px;margin:10px 0 8px}
+.seats i{flex:1;height:20px;border-radius:5px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px 2px 6px;white-space:nowrap}
+.legend span i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.legend span em{font-style:normal;font-weight:800}
+.legend span.fix{color:var(--sub)}
+.rec{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.rec .rt{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.rec .rt em{font-style:normal;color:var(--brand)}
+.rec ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}
+.rec li{font-size:13px;background:var(--soft);border-radius:999px;padding:2px 10px;word-break:keep-all}
+.note{display:block;font-size:12.5px;color:var(--sub);line-height:1.5;margin-top:8px;word-break:keep-all}
+.texts p{background:var(--bg);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-line}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="school"><svg class="emblem" viewBox="0 0 1205 1205" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g transform="translate(-2200 -896)"><path d="M2200 1498.5C2200 1165.75 2469.75 896 2802.5 896 3135.25 896 3405 1165.75 3405 1498.5 3405 1831.25 3135.25 2101 2802.5 2101 2469.75 2101 2200 1831.25 2200 1498.5Z" fill="#EFD311" fill-rule="evenodd"/><path d="M2450.9 1499C2580.99 1499 2698.77 1551.69 2784.03 1636.87L2805.09 1660.02 2826.15 1636.87C2911.41 1551.69 3029.19 1499 3159.28 1499 3240.59 1499 3317.09 1519.58 3383.84 1555.81L3401 1566.23 3392.77 1620.14C3336.56 1894.57 3093.54 2101 2802.26 2101 2510.98 2101 2267.96 1894.57 2211.75 1620.14L2204 1569.37 2226.34 1555.81C2293.09 1519.58 2369.59 1499 2450.9 1499Z" fill="#3752A4" fill-rule="evenodd"/><path d="M2929.77 1204.2 2929.77 1245.08 3047.1 1245.08 3047.1 1204.2ZM2929.77 1134.48 2929.77 1175.36 3047.1 1175.36 3047.1 1134.48ZM2578.45 1071 2617.35 1071 2617.35 1105.65 2696.39 1105.65 2735.29 1105.65 2736.38 1105.65 2736.38 1134.48 2735.29 1134.48 2735.29 1307.49C2735.29 1339.34 2770.12 1365.16 2813.08 1365.16 2856.04 1365.16 2890.87 1339.34 2890.87 1307.49L2890.87 1105.65 2891.52 1105.65 2929.77 1105.65 3047.1 1105.65 3086 1105.65 3086 1134.48 3086 1175.36 3086 1204.2 3086 1245.08 3086 1273.91 3086 1394 3047.1 1394 3047.1 1273.91 2929.77 1273.91 2929.77 1307.49C2929.77 1355.27 2877.53 1394 2813.08 1394 2748.64 1394 2696.39 1355.27 2696.39 1307.49L2696.39 1134.48 2617.35 1134.48 2617.35 1290.49C2617.35 1335.95 2577.35 1373.88 2524.18 1382.65L2503.53 1384.33 2503.53 1352.97 2516.34 1351.93C2551.79 1346.08 2578.45 1320.8 2578.45 1290.49L2578.45 1134.48 2503 1134.48 2503 1105.65 2578.45 1105.65Z" fill="#FFFFFF" fill-rule="evenodd"/><path d="M2827.57 1745.18 2827.57 1936.01 2843.55 1934.44C2931.52 1917.9 3000.95 1849.25 3018.71 1761.93L3020.38 1745.18ZM2584.69 1745.18 2587.27 1766.44C2606.85 1853.37 2677.7 1920.55 2766 1935.25L2783.88 1936.63 2783.88 1745.18ZM3143.05 1487.09C3204.17 1485.91 3266.09 1496.32 3325.54 1519.15 3349.31 1528.28 3372.05 1539.15 3393.64 1551.59L3402 1557.31 3401.84 1560.44 3395.88 1599.45 3374.45 1584.8C3354.59 1573.36 3333.65 1563.35 3311.77 1554.94 3158.55 1496.1 2987.42 1526.89 2864.97 1630.6L2827.57 1667.66 2827.57 1701.52 3099.06 1701.52 3099.06 1745.18 3060.91 1745.18 3058.42 1770.03C3037.4 1873.39 2955.22 1954.65 2851.09 1974.23L2827.57 1976.54 2827.57 2099.73 2802.32 2101 2783.88 2100.07 2783.88 1977.08 2759.29 1975.19C2654.77 1957.79 2570.91 1878.27 2547.73 1775.37L2544.07 1745.18 2505.94 1745.18 2505.94 1701.52 2783.88 1701.52 2783.88 1667.88 2749.45 1633.13C2627.44 1527.94 2455.75 1495.83 2301.64 1554.2 2279.62 1562.53 2258.56 1572.49 2238.57 1583.9L2209.4 1603.68 2203 1561.81 2219.52 1550.61C2241.24 1538.21 2264.12 1527.4 2288.03 1518.34 2455.45 1454.94 2641.97 1489.82 2774.51 1604.09L2805.21 1635.07 2822.67 1616.9C2910.78 1534.61 3025.41 1489.37 3143.05 1487.09Z" fill="#FFFFFF" fill-rule="evenodd"/></g></svg><span>구월중학교 다면평가관리위원회</span></div>
+    <h1 id="title">다면평가자 선정 투표</h1>
+    <div class="meta"><span id="badge" class="badge b-wait">불러오는 중</span><span id="period"></span><span id="turnout"></span></div>
+  </header>
+
+  <div class="card msg info" style="margin-top:14px">👀 <b>참고용 예시 화면</b>이에요. 실제 투표에서는 나이스 개인번호로 본인 확인을 하지만, 여기서는 확인 없이 문항을 볼 수 있어요. 끝까지 눌러 봐도 아무 것도 저장되지 않아요.</div>
+  <div id="loading" class="card center">불러오는 중이에요…</div>
+
+  <!-- 투표 -->
+  <section id="vote" class="hidden">
+    <div class="card guide" id="guide"></div>
+
+    <details class="card more" id="useInfo">
+      <summary>📌 다면평가 결과는 어디에 쓰이나요? <span class="tap"></span></summary>
+      <div class="more-body">
+        <h4>1. 다면평가는 두 가지로 합니다</h4>
+        <ul>
+          <li><b>정성평가(100점)</b> — 다면평가자가 자기실적평가서와 평소 모습을 보고 매깁니다. 교육공무원으로서의 태도 10 · 학습지도 40 · 생활지도 30 · 전문성 개발 5 · 담당업무 15점이고, 수 30% · 우 40% · 미 20% · 양 10%로 나누는 상대평가입니다. 평가자는 자기 자신을 평가하지 않고, 평가자가 4명 이상이면 가장 높은 점수와 가장 낮은 점수를 준 두 사람을 빼고 평균을 냅니다.</li>
+          <li><b>정량평가(100점)</b> — 학교 정량평가 기준(수업 시수, 담임·업무, 연수, 자율동아리 등)에 따라 점수를 매기는 절대평가입니다. 평가자가 증빙을 검토하고 다면평가관리위원회가 최종 확인합니다.</li>
+        </ul>
+        <h4>2. 근무성적평정(승진)에 들어갑니다 — 정규교사</h4>
+        <table class="mini">
+          <tr><th>근무성적평정</th><td>교감(평정자) 20점 + 교장(확인자) 40점</td><td class="n">60점</td></tr>
+          <tr><th>다면평가</th><td>정성평가 32점 + 정량평가 8점</td><td class="n">40점</td></tr>
+          <tr class="t"><th>합계</th><td>교사 근무성적 점수</td><td class="n">100점</td></tr>
+        </table>
+        <p>이 점수는 승진 후보자 명부를 만들 때 근무성적 점수로 쓰입니다(최근 5년 가운데 본인에게 유리한 3년 반영). 다면평가 40점 가운데 32점이 다면평가자가 매기는 정성평가입니다.</p>
+        <h4>3. 성과상여금에 들어갑니다 — 정규·기간제 교사</h4>
+        <p>다음 해 3월에 지급하는 교원 성과상여금의 등급(S·A·B)을 정할 때 다면평가 점수를 씁니다. 우리 학교는 <b>정량평가 80% + 정성평가 20%</b>로 반영합니다(2026학년도 정량평가 기준). 평가 기간 중 2개월 이상 근무한 교사가 대상입니다.</p>
+        <h4>4. 그래서 평가자 선정이 중요합니다</h4>
+        <p>근무성적의 정성평가 32점과 성과상여금의 정성평가 20%를 다면평가자가 매깁니다. 학년·부서·경력·교과·성별이 고르게 들어가야 여러 선생님의 근무를 공정하게 볼 수 있어서, 선정 기준을 선생님들께 여쭙니다.</p>
+        <p class="src">근거: 2026학년도 교사 다면평가 시행 계획(인천광역시교육청), 2026 구월중 다면평가 정량평가 기준(최종)</p>
+      </div>
+    </details>
+
+    <div class="card" id="stepVerify">
+      <h2>본인 확인</h2>
+      <form id="fVerify" autocomplete="off">
+        <label class="f" for="nid">나이스 개인번호</label>
+        <div class="nidbox"><span class="pre">E</span><input type="text" id="nid" maxlength="9" inputmode="numeric" pattern="[0-9]*" placeholder="E 뒤 숫자 9자리" autocomplete="off"></div>
+        <div class="hint">개인번호는 본인 확인에만 쓰이고, 투표 내용과 함께 저장되지 않아요.</div>
+        <div class="msg info">예시 화면에서는 비워 두고 [확인]을 누르면 돼요.</div>
+        <button class="btn" id="bVerify" type="submit">확인</button>
+      </form>
+      <div id="mVerify"></div>
+    </div>
+
+    <div class="card hidden" id="stepBallot">
+      <form id="fBallot"><div id="qs"></div>
+        <button class="btn" type="submit">다음: 고른 내용 확인</button>
+      </form>
+      <div id="mBallot"></div>
+    </div>
+
+    <div class="card hidden" id="stepConfirm">
+      <h2>고른 내용 확인</h2>
+      <p class="hint">제출하면 바꿀 수 없어요.</p>
+      <dl class="sum" id="sum"></dl>
+      <div class="row2"><button class="btn ghost" id="bBack" type="button">고치기</button><button class="btn" id="bSubmit" type="button">제출</button></div>
+      <div id="mConfirm"></div>
+    </div>
+
+    <div class="card hidden center" id="stepDone">
+      <div class="big">✓</div>
+      <h2 style="margin-top:12px">투표가 끝났어요</h2>
+      <p class="hint">참여해 주셔서 고맙습니다. 결과는 다면평가관리위원회에서 확인한 뒤 안내해 드려요.</p>
+      <p class="hint">(예시 화면이라 실제로 저장되지는 않았어요.)</p>
+      <button class="btn ghost" type="button" onclick="location.reload()">처음부터 다시 보기</button>
+    </div>
+  </section>
+
+  <!-- 관리자 -->
+  <section id="admin" class="hidden">
+    <div class="card" id="admLogin">
+      <h2>관리자 현황</h2>
+      <form id="fAdmin"><label class="f" for="apw">비밀번호</label><input type="password" id="apw">
+        <button class="btn" type="submit">보기</button></form>
+      <div id="mAdmin"></div>
+    </div>
+    <div id="admView" class="hidden"></div>
+  </section>
+
+  <footer><span id="admLink">참고용 예시 화면 · 저장되지 않음</span></footer>
+</div>
+
+<script>
+const API_URL = '';
+const API = new URLSearchParams(location.search).get('api') || API_URL;
+const isAdmin = false;
+const $ = (id) => document.getElementById(id);
+const show = (id, on = true) => $(id).classList.toggle('hidden', !on);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let CFG = null, TOKEN = '', ANS = {};
+const CUSTOM = '직접 입력';
+// 선택지 설명이 "【구성】 A 1 + B 2 = 9명 【2차 추천】 x / y = 3명 【참고】 …" 형식이면 자리 칸으로 그린다
+function seatColor(label, k) {
+  if (/고정|교무기획부장/.test(label)) return 'var(--s0)';
+  if (/남교사/.test(label)) return 'var(--sm)';
+  if (/여교사/.test(label)) return 'var(--sf)';
+  return `var(--s${(k % 6) + 1})`;
+}
+function parseRich(d) {
+  if (!d || d.indexOf('【구성】') < 0) return null;
+  const sec = {};
+  d.replace(/【([^】]+)】([^【]*)/g, (_, k, v) => { sec[k.trim()] = v.trim(); });
+  const [parts, total] = (sec['구성'] || '').split(/\s*=\s*/);
+  let k = 0;
+  const seats = (parts || '').split(/\s*\+\s*/).map((x) => {
+    const m = x.match(/^(.*?)\s*(\d+)\s*(\(고정\))?$/);
+    if (!m) return null;
+    const label = m[1].trim(), fixed = !!m[3] || /교무기획부장/.test(label);
+    const color = seatColor(label + (fixed ? '고정' : ''), /남교사|여교사/.test(label) || fixed ? 0 : k++);
+    return { label, n: +m[2], fixed, color };
+  }).filter(Boolean);
+  const rk = Object.keys(sec).find((x) => /추천/.test(x));
+  const [rItems, rTotal] = rk ? sec[rk].split(/\s*=\s*/) : ['', ''];
+  return { seats, total: (total || '').trim(), rec: (rItems || '').split(/\s*\/\s*/).filter(Boolean), recTotal: (rTotal || '').trim(), note: sec['참고'] || '' };
+}
+function richHtml(r) {
+  const cells = r.seats.flatMap((s) => Array.from({ length: s.n }, () => `<i style="background:${s.color}" title="${esc(s.label)}"></i>`)).join('');
+  const legend = r.seats.map((s) => `<span class="${s.fixed ? 'fix' : ''}"><i style="background:${s.color}"></i>${esc(s.label)}${s.fixed ? ' (고정)' : ''} <em>${s.n}</em></span>`).join('');
+  const rec = r.rec.length ? `<div class="rec"><div class="rt">2차 추천 투표 · 한 사람이 <em>${esc(r.recTotal)}</em> 추천</div><ol>${r.rec.map((x, i) => `<li>${'①②③④⑤⑥⑦⑧'[i] || ''} ${esc(x)}</li>`).join('')}</ol></div>` : '';
+  return `<div class="seats" aria-hidden="true">${cells}</div><div class="legend">${legend}</div>${rec}${r.note ? `<small class="note">${esc(r.note)}</small>` : ''}`;
+}
+
+
+const ERR = {
+  nomatch: '등록된 나이스 개인번호가 아니에요. 다시 확인해 주세요.',
+  nid: 'E 뒤의 숫자 9자리를 입력해 주세요.',
+  name: '이름을 확인해 주세요.',
+  noright: '이번 투표 대상(재직 중인 교원)이 아니에요. 잘못되었다면 교무기획부에 알려 주세요.',
+  locked: '확인 실패가 많아 본인 확인을 10분 동안 막았어요. 잠시 뒤 다시 해 주세요.',
+  closed: '지금은 투표 기간이 아니에요.', notyet: '아직 투표가 시작되지 않았어요.', ended: '투표가 마감되었어요.',
+  already: '이미 투표하셨어요. 1인 1회만 투표할 수 있어요.',
+  token: '본인 확인을 다시 해 주세요.', expired: '확인한 지 1시간이 지났어요. 본인 확인을 다시 해 주세요.',
+  busy: '투표가 몰려 잠시 밀렸어요. 한 번 더 눌러 주세요.',
+  pw: '비밀번호가 맞지 않아요.', network: '연결이 잘 안 돼요. 잠시 뒤 다시 해 주세요.', server: '서버에 문제가 생겼어요. 교무기획부에 알려 주세요.'
+};
+function errText(code) {
+  const m = String(code).match(/^(need|option|one|max|alone|custom):(.+)$/);
+  if (m) return { need: `${m[2]}번 문항에 답해 주세요.`, option: `${m[2]}번 문항의 선택지가 바뀌었어요. 새로 고침 해 주세요.`, one: `${m[2]}번은 하나만 고를 수 있어요.`, max: `${m[2]}번은 고를 수 있는 개수를 넘었어요.`, alone: `${m[2]}번에서 '없음'은 다른 것과 함께 고를 수 없어요.`, custom: `${m[2]}번 '직접 입력' 칸에 내용을 적어 주세요.` }[m[1]];
+  return ERR[code] || `문제가 생겼어요 (${code})`;
+}
+function msg(id, text, kind = 'err') { $(id).innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ''; }
+
+// Apps Script 는 text/plain 으로 보내야 브라우저 사전 확인(CORS) 없이 받는다
+const DEMO_CFG = {"title": "2026 다면평가자 선정 기준 의견 투표 (1차)", "guide": "【다면평가자란?】 정규교사의 1년 근무를 동료 교사가 함께 평가하는 제도가 다면평가이고, 그 평가를 맡는 교사가 다면평가자입니다. 다면평가자는 12월에 동료 교사들의 자기실적평가서를 보고 평가합니다.\n\n【이번 투표는?】 다면평가자를 \"어떤 방식으로 구성하고, 어떻게 추천할지\" 선생님들의 의견을 묻는 1차 투표입니다. 결과를 바탕으로 다면평가관리위원회가 기준을 정하고, 이어서 2차 투표로 실제 평가자를 추천받습니다.\n\n【이미 정해진 기준(법령)】\n· 본교에서 실제 근무한 기간이 10개월 이상인 정규교사만 평가자가 될 수 있음\n· 휴직·파견·직위해제·징계 중인 교사, 기간제교사 등은 평가자가 될 수 없음\n· 다면평가관리위원회 위원장(교감)은 평가자가 될 수 없음\n· 평가 대상이 36명 이상이면 평가자는 8명 이상 (올해 평가 대상은 약 41명)\n\n투표는 1인 1회, 무기명입니다. 누가 투표했는지와 무엇을 골랐는지는 따로 저장되어 서로 연결되지 않습니다.", "state": "open", "opensAt": null, "closesAt": null, "questions": [{"no": "1", "kind": "single", "title": "다면평가자를 어떤 방식으로 구성할까요?", "desc": "선택지마다 평가자 자리 구성(색 칸)과, 2차 추천 투표에서 한 사람이 추천할 칸을 함께 보여 드려요. 세 방식 모두 교무기획부장이 평가자로 들어갑니다.\n2차 투표에서는 자리마다 추천을 많이 받은 순으로 2배수(9명이면 18명, 10명이면 20명) 후보를 정하고, 그중에서 교장선생님이 최종 평가자를 정합니다(교육청 시행계획의 선정 절차 예시). 추천할 수 있는 선생님은 본교에서 10개월 이상 근무한 정규교사입니다.", "options": ["영역별 대표 방식", "경력별 대표 방식", "교과군별 대표 방식"], "details": ["【구성】 교무기획부장 1(고정) + 부장 대표 2 + 1학년 담임 대표 1 + 2학년 담임 대표 1 + 3학년 담임 대표 1 + 비담임 대표 1 + 남교사 대표 1 + 여교사 대표 1 = 9명 【2차 추천】 부장 중 1명 / 1학년 담임 중 1명 / 2학년 담임 중 1명 / 3학년 담임 중 1명 / 비담임 중 1명 / 나와 같은 성별에서 1명 = 6명 【참고】 부장(학년부장 포함)과 담임을 겸하는 분은 없습니다. 평가자가 될 수 있는 정규교사 41명은 부장 10명, 1학년 담임 6명, 2학년 담임 8명, 3학년 담임 7명, 비담임(부장 제외) 10명입니다. 남교사 대표는 남교사들의, 여교사 대표는 여교사들의 추천으로 정합니다. 같은 분이 영역 대표와 남·여교사 대표에 함께 뽑히면 영역 대표로 정하고, 남·여교사 대표는 다음 순위로 넘깁니다.", "【구성】 교무기획부장 1(고정) + 경력 10년 이하 3 + 경력 11~20년 2 + 경력 21년 이상 2 + 남교사 대표 1 + 여교사 대표 1 = 10명 【2차 추천】 경력 10년 이하에서 1명 / 11~20년에서 1명 / 21년 이상에서 1명 / 나와 같은 성별에서 1명 = 4명 【참고】 경력 대표 7자리는 추천 대상 정규교사 41명의 교육경력 분포(10년 이하 19명, 11~20년 13명, 21년 이상 9명)에 비례합니다. 남교사 대표는 남교사들의, 여교사 대표는 여교사들의 추천으로 정합니다. 같은 분이 경력 대표와 남·여교사 대표에 함께 뽑히면 경력 대표로 정하고, 남·여교사 대표는 다음 순위로 넘깁니다.", "【구성】 교무기획부장 1(고정) + 인문·사회 3 + 수리·과학·기술 2 + 예체능 1 + 비교과·특수 1 + 남교사 대표 1 + 여교사 대표 1 = 10명 【2차 추천】 인문·사회에서 1명 / 수리·과학·기술에서 1명 / 예체능에서 1명 / 비교과·특수에서 1명 / 나와 같은 성별에서 1명 = 5명 【참고】 인문·사회=국어·영어·역사·사회·지리·도덕·한문(15명), 수리·과학·기술=수학·과학·기술·가정·정보(13명), 예체능=체육·미술·음악(8명), 비교과·특수=특수·진로·보건·상담(5명). 교과군 대표 7자리는 이 인원에 비례합니다. 남교사 대표는 남교사들의, 여교사 대표는 여교사들의 추천으로 정합니다. 같은 분이 교과군 대표와 남·여교사 대표에 함께 뽑히면 교과군 대표로 정하고, 남·여교사 대표는 다음 순위로 넘깁니다."], "required": true, "max": 0, "last": ["영역별 대표 방식"]}, {"no": "2", "kind": "text", "title": "그 밖에 의견이 있으면 적어 주세요.", "desc": "", "options": [], "details": [], "required": false, "max": 0, "last": []}], "eligible": null, "voted": 0};
+async function call(action, data = {}) {
+  await new Promise((r) => setTimeout(r, 250));
+  if (action === 'config') return { ok: true, result: JSON.parse(JSON.stringify(DEMO_CFG)) };
+  if (action === 'verify') return { ok: true, result: { token: 'demo', voted: false } };
+  if (action === 'vote') return { ok: true, result: {} };
+  return { ok: false, error: 'server' };
+}
+async function callServerUnused(action, data = {}) {
+  if (!API) return { ok: false, error: 'server' };
+  let res;
+  try { res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...data }), redirect: 'follow' }); }
+  catch (e) { return { ok: false, error: 'network' }; }
+  try { return await res.json(); } catch (e) { return { ok: false, error: 'network' }; }
+}
+const fmt = (t) => { if (!t) return ''; const d = new Date(t + 9 * 3600e3); const w = '일월화수목금토'[d.getUTCDay()]; return `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${w}) ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
+
+function head(c) {
+  $('title').textContent = c.title || '다면평가자 선정 투표';
+  document.title = c.title || document.title;
+  const b = $('badge');
+  const map = { open: ['예시 화면', 'b-wait'], notyet: ['시작 전', 'b-wait'], ended: ['마감', 'b-off'], closed: ['닫힘', 'b-off'] };
+  const [t, cls] = map[c.state] || ['', 'b-wait']; b.textContent = t; b.className = 'badge ' + cls;
+  $('period').textContent = (c.opensAt || c.closesAt) ? `${fmt(c.opensAt) || '지금'} ~ ${fmt(c.closesAt) || ''}` : '';
+  if (c.eligible != null) $('turnout').textContent = `참여 ${c.voted}/${c.eligible}명`;
+}
+
+async function boot() {
+  if (isAdmin) { show('loading', false); show('admin'); $('admLink').href = './'; $('admLink').textContent = '투표 화면'; return; }
+  const r = await call('config');
+  show('loading', false);
+  if (!r.ok) { $('loading').textContent = errText(r.error); show('loading'); return; }
+  CFG = r.result; head(CFG);
+  $('guide').textContent = CFG.guide;
+  show('vote');
+  if (CFG.state !== 'open') { msg('mVerify', errText(CFG.state), 'info'); }
+}
+
+// 숫자만 남긴다 (E 를 같이 쳐도 지워짐)
+$('nid').addEventListener('input', () => { const v = $('nid').value.replace(/\D/g, '').slice(0, 9); if (v !== $('nid').value) $('nid').value = v; });
+$('fVerify').addEventListener('submit', async (e) => {
+  e.preventDefault(); msg('mVerify', '');
+  const digits = $('nid').value.replace(/\D/g, '');
+  const nid = 'E' + digits;
+  $('bVerify').disabled = true; $('bVerify').textContent = '확인 중…';
+  const r = await call('verify', { nid });
+  $('bVerify').disabled = false; $('bVerify').textContent = '확인';
+  if (!r.ok) return msg('mVerify', errText(r.error));
+  if (r.result.voted) return msg('mVerify', '이미 투표를 마친 번호예요. 참여해 주셔서 고맙습니다.', 'ok');
+  if (CFG.state !== 'open') return msg('mVerify', errText(CFG.state), 'info');
+  TOKEN = r.result.token; $('nid').value = '';
+  renderQs(); show('stepVerify', false); show('stepBallot'); window.scrollTo({ top: $('stepBallot').offsetTop - 12, behavior: 'smooth' });
+});
+
+function renderQs() {
+  $('qs').innerHTML = CFG.questions.map((q) => {
+    const h = `<h3><span class="no">${esc(q.no)}.</span>${esc(q.title)}${q.required ? '<span class="req">필수</span>' : ''}</h3>` + (q.desc ? `<p class="desc">${esc(q.desc)}</p>` : '');
+    if (q.kind === 'text') return `<div class="q" data-no="${esc(q.no)}">${h}<textarea rows="3" maxlength="1000" data-no="${esc(q.no)}"></textarea></div>`;
+    const type = q.kind === 'multi' ? 'checkbox' : 'radio';
+    const note = q.kind === 'multi' ? `<p class="desc">여러 개 고를 수 있어요${q.max ? ` (최대 ${q.max}개)` : ''}.</p>` : '';
+    return `<div class="q" data-no="${esc(q.no)}">${h}${note}` + q.options.map((o, i) =>
+      { const rich = parseRich((q.details || [])[i]); return `<label class="opt${rich ? ' rich' : ''}"><input type="${type}" name="q${esc(q.no)}" value="${esc(o)}"><span class="ot">${rich ? '<span class="rh">' : ''}<b>${esc(o)}</b>${(q.last || []).includes(o) ? '<span class="last">2025학년도 방식</span>' : ''}${rich && rich.total ? `<span class="total">${esc(rich.total)}</span></span>` : (rich ? '</span>' : '')}`
+      + (rich ? richHtml(rich) : ((q.details || [])[i] ? `<small>${esc(q.details[i])}</small>` : ''))
+      + (o === CUSTOM ? `<input type="text" class="custom" data-no="${esc(q.no)}" maxlength="60" placeholder="예: 11명" disabled>` : '')
+      + `</span></label>`; }).join('') + '</div>';
+  }).join('');
+  $('qs').querySelectorAll('input[name]').forEach((inp) => inp.addEventListener('change', () => {
+    const box = inp.closest('.q'), q = CFG.questions.find((x) => x.no === box.dataset.no);
+    if (q.kind === 'multi' && inp.checked) {
+      const alone = /없음/.test(inp.value);
+      box.querySelectorAll('input').forEach((o) => { if (o !== inp && (alone || /없음/.test(o.value))) o.checked = false; });
+      const n = box.querySelectorAll('input:checked').length;
+      if (q.max && n > q.max) { inp.checked = false; msg('mBallot', `최대 ${q.max}개까지 고를 수 있어요.`); }
+    }
+    box.querySelectorAll('.opt').forEach((l) => l.classList.toggle('on', l.querySelector('input').checked));
+    const c = box.querySelector('input.custom');
+    if (c) { const on = box.querySelector(`input[value="${CUSTOM}"]`).checked; c.disabled = !on; if (on) c.focus(); }
+  }));}
+
+function collect() {
+  const a = {};
+  for (const q of CFG.questions) {
+    if (q.kind === 'text') a[q.no] = $('qs').querySelector(`textarea[data-no="${CSS.escape(q.no)}"]`).value.trim();
+    else {
+      const v = [...$('qs').querySelectorAll(`input[name="q${CSS.escape(q.no)}"]:checked`)].map((x) => x.value);
+      const ci = v.indexOf(CUSTOM);
+      if (ci >= 0) {
+        const t = $('qs').querySelector(`input.custom[data-no="${CSS.escape(q.no)}"]`).value.trim();
+        if (!t) return { err: q.no, code: 'custom' };
+        v[ci] = `${CUSTOM}: ${t}`;
+      }
+      a[q.no] = q.kind === 'multi' ? v : (v[0] || '');
+    }
+    const empty = Array.isArray(a[q.no]) ? !a[q.no].length : !a[q.no];
+    if (q.required && empty) { return { err: q.no }; }
+  }
+  return { a };
+}
+
+$('fBallot').addEventListener('submit', (e) => {
+  e.preventDefault(); msg('mBallot', '');
+  const c = collect();
+  if (c.err) { msg('mBallot', errText((c.code || 'need') + ':' + c.err)); document.querySelector(`.q[data-no="${CSS.escape(c.err)}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  ANS = c.a;
+  $('sum').innerHTML = CFG.questions.map((q) => {
+    const v = ANS[q.no]; const t = Array.isArray(v) ? v.join(', ') : v;
+    return `<dt>${esc(q.no)}. ${esc(q.title)}</dt><dd>${t ? esc(t) : '(없음)'}</dd>`;
+  }).join('');
+  show('stepBallot', false); show('stepConfirm'); window.scrollTo({ top: $('stepConfirm').offsetTop - 12, behavior: 'smooth' });
+});
+$('bBack').addEventListener('click', () => { show('stepConfirm', false); show('stepBallot'); msg('mConfirm', ''); });
+$('bSubmit').addEventListener('click', async () => {
+  const b = $('bSubmit'); b.disabled = true; b.textContent = '제출 중…'; msg('mConfirm', '');
+  const r = await call('vote', { token: TOKEN, answers: ANS });
+  b.disabled = false; b.textContent = '제출';
+  if (!r.ok) {
+    msg('mConfirm', errText(r.error));
+    if (['token', 'expired'].includes(r.error)) { show('stepConfirm', false); show('stepVerify'); msg('mVerify', errText(r.error)); }
+    return;
+  }
+  TOKEN = ''; show('stepConfirm', false); show('stepDone');
+  CFG.voted++; head(CFG);
+});
+
+// ---------- 관리자 ----------
+let APW = '';
+$('fAdmin').addEventListener('submit', async (e) => { e.preventDefault(); APW = $('apw').value; await loadAdmin(); });
+async function loadAdmin() {
+  msg('mAdmin', '불러오는 중…', 'info');
+  const r = await call('admin', { pw: APW });
+  if (!r.ok) return msg('mAdmin', errText(r.error));
+  msg('mAdmin', ''); show('admLogin', false); show('admView');
+  const d = r.result, pct = d.eligible ? Math.round(d.voted / d.eligible * 100) : 0;
+  head({ title: '관리자 현황', state: d.state, opensAt: d.opensAt, closesAt: d.closesAt, eligible: d.eligible, voted: d.voted });
+  let h = `<div class="card"><h2>참여 현황</h2><div class="tl"><b>${d.voted} / ${d.eligible}명</b><span>${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div>`
+    + `<div class="hint">투표지 ${d.ballots}장 · 아직 투표하지 않은 선생님 ${d.notVoted.length}명</div><div class="chips">${d.notVoted.map((n) => `<span>${esc(n)}</span>`).join('')}</div>`
+    + `<button class="btn ghost" id="bRe" type="button">새로 고침</button></div>`;
+  h += d.questions.map((q) => {
+    if (q.kind === 'text') return `<div class="card"><h2>${esc(q.no)}. ${esc(q.title)}</h2><div class="texts">${q.texts.length ? q.texts.map((t) => `<p>${esc(t)}</p>`).join('') : '<p class="hint">의견 없음</p>'}</div></div>`;
+    const tot = q.kind === 'multi' ? (q.answered || 0) : q.options.reduce((s, o) => s + o.count, 0);
+    return `<div class="card"><h2>${esc(q.no)}. ${esc(q.title)}</h2>` + q.options.map((o) => {
+      const p = tot ? Math.round(o.count / tot * 100) : 0;
+      return `<div class="tl"><span>${esc(o.label)}${(q.last || []).includes(o.label) ? '<span class="last">2025학년도 방식</span>' : ''}</span><b>${o.count}표</b></div><div class="bar"><i style="width:${p}%"></i></div>`;
+    }).join('') + (q.kind === 'multi' ? `<div class="hint">응답 ${tot}명 기준 (여러 개 선택)</div>` : '')
+      + ((q.customs || []).length ? `<div class="hint">직접 입력한 내용</div><div class="chips">${q.customs.map((t) => `<span>${esc(t)}</span>`).join('')}</div>` : '') + '</div>';
+  }).join('');
+  $('admView').innerHTML = h;
+  $('bRe').addEventListener('click', loadAdmin);
+}
+
+boot();
+</script>
+</body>
+</html>
