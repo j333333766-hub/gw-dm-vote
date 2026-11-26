@@ -138,6 +138,7 @@ table.adm{width:100%;border-collapse:collapse;font-size:13.5px}table.adm td,tabl
 .mini.fix{margin-top:6px}.mini.fix.on{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}.ro{font-size:15px}
 ul.detail{margin:4px 0 8px;padding:8px 12px 8px 26px;background:var(--bg);border:1px solid var(--line);border-radius:9px;font-size:12.8px;line-height:1.6;color:var(--ink)}ul.detail li{margin:2px 0;word-break:keep-all}ul.detail b{color:var(--brand)}
 .found{font-size:12.5px;color:var(--ok);background:var(--okbg);border-radius:8px;padding:5px 9px;margin:2px 0 4px;word-break:keep-all}
+.autotag{display:inline-block;font-size:12px;font-weight:700;color:var(--brand);background:var(--soft);border-radius:999px;padding:1px 9px;margin:2px 0 4px}
 </style></head>
 <body>
 <div class="wrap">
@@ -229,6 +230,26 @@ const SIMPLE = ['L8', 'L10', 'G2', 'G3', 'W2', 'W3', 'W4', 'W5', 'W7', 'W8'];
 
 function newData() { return { ov: {}, L1: {}, L9: { on: false, date: '', doc: '' }, W9: { rows: [] }, W10: { jaul: { on: false, doc: '' }, gm: { on: false, doc: '', memo: '' } }, extra: [], files: [] }; }
 function B(id) { return ST.base.items[id]; }
+// 내부기안 근거로 입력 칸 자동 채움 — 한 번만(교사가 고친 값은 덮어쓰지 않음). 근거가 새로 늘면 AUTO_V 를 올림
+const AUTO_V = 1;
+function applyAuto(d) {
+  if ((d.autoV || 0) >= AUTO_V) return d;
+  const b = ST.base.items;
+  if (!d.W9.rows.length) d.W9.rows = b.W9.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
+  b.W9.comm.forEach((c) => { if (!d.W9.rows.some((x) => x.name === c.name)) d.W9.rows.push({ name: c.name, as: c.as, on: false, count: '', doc: '' }); });
+  d.W9.rows.forEach((x) => {
+    const c = b.W9.comm.find((y) => y.name === x.name); const f = c && c.found ? c.found : [];
+    if (f.length && !x.touched && (x.auto || (!x.count && !x.doc))) {
+      x.count = String(f.length); x.doc = f.map((m) => m.docs.map((n) => '구월중학교-' + n).join('/')).join(', '); x.on = f.length >= 3; x.auto = true;
+    }
+  });
+  const a9 = b.L9.auto; if (a9 && !d.L9.touched && (d.L9.auto || (!d.L9.on && !d.L9.doc))) { Object.assign(d.L9, a9); d.L9.auto = true; }
+  const a10 = b.W10.auto || {};
+  if (a10.jaul && !d.W10.jaul.touched && (d.W10.jaul.auto || (!d.W10.jaul.on && !d.W10.jaul.doc))) { Object.assign(d.W10.jaul, a10.jaul); d.W10.jaul.auto = true; }
+  if (a10.gm && !d.W10.gm.touched && (d.W10.gm.auto || (!d.W10.gm.on && !d.W10.gm.doc))) { Object.assign(d.W10.gm, a10.gm); d.W10.gm.auto = true; }
+  d.autoV = AUTO_V; return d;
+}
+const AUTOTAG = '<span class="autotag">내부기안으로 자동 채움 — 확인하고 다르면 고쳐 주세요</span>';
 
 // ---------- 점수 ----------
 function l1() {
@@ -323,7 +344,7 @@ function itemHtml(id) {
     return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${b.warn ? `<div class="warnbox">${esc(b.warn)}</div>` : ''}<div id="l1d">${detailHtml('L1')}</div>${rows}
       ${fixBtn('L1')}<div class="ovbox${on ? '' : ' hidden'}"><label class="f">고친 사유·근거</label><textarea rows="2" data-l1="reason" placeholder="예: 1학기 4월부터 2시간 추가 담당">${esc(d.L1.reason || '')}</textarea></div></div>`;
   }
-  if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}<label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>
+  if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}<label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>${d.L9.auto ? AUTOTAG : ''}
       <div class="grid2"><input type="text" data-in="L9.date" placeholder="날짜 예: 6/12" value="${esc(d.L9.date)}"><input type="text" data-in="L9.doc" placeholder="문서번호 예: 구월중학교-12345" value="${esc(d.L9.doc)}"></div>${fixAll(id)}</div>`;
   if (id === 'P2') {
     const list = b.list.map((t) => `<li>${esc(t.name)} <small>${esc(t.org)} · ${esc(t.end)} · ${t.hours}시간</small></li>`).join('') || '<li class="hint">나이스에 2026. 1. 1. 이후 끝난 직무연수가 없어요</li>';
@@ -336,17 +357,16 @@ function itemHtml(id) {
   if (id === 'W9') {
     const mine = b.comm.map((c) => c.name);
     if (!d.W9.rows.length) d.W9.rows = b.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
-    b.comm.forEach((c) => { if (!d.W9.rows.some((x) => x.name === c.name)) d.W9.rows.push({ name: c.name, as: c.as, on: false, count: '', doc: '' }); });
     const fnd = (nm) => { const c = b.comm.find((y) => y.name === nm); return c && c.found && c.found.length ? `<div class="found">내부기안에 선생님 이름이 나온 회의 <b>${c.found.length}회</b>: ${c.found.map((f) => (f.date ? f.date.slice(5).replace('-', '/') + ' ' : '') + f.docs.map((x) => '구월중학교-' + x).join('/')).join(', ')} — 참석 추정, 실제 참석 횟수로 적어 주세요</div>` : ''; };
-    const rows = d.W9.rows.map((x, i) => `<div class="cmrow"><label class="chk"><input type="checkbox" data-cm="${i}" data-k="on" ${x.on ? 'checked' : ''}> <b>${esc(x.name)}</b> ${x.as ? `<small>명단상: ${esc(x.as)}</small>` : (b.comm.some((y) => y.name === x.name) ? '<small>내부기안에서 찾음</small>' : '<small>직접 추가</small>')}</label>${fnd(x.name)}
+    const rows = d.W9.rows.map((x, i) => `<div class="cmrow"><label class="chk"><input type="checkbox" data-cm="${i}" data-k="on" ${x.on ? 'checked' : ''}> <b>${esc(x.name)}</b> ${x.as ? `<small>명단상: ${esc(x.as)}</small>` : (b.comm.some((y) => y.name === x.name) ? '<small>내부기안에서 찾음</small>' : '<small>직접 추가</small>')}</label>${fnd(x.name)}${x.auto ? '<span class="autotag">횟수·근거 자동 채움(3회 이상이면 체크됨) — 실제 참석과 다르면 고쳐 주세요</span>' : ''}
       <div class="grid2"><input type="number" min="0" data-cm="${i}" data-k="count" placeholder="참석 횟수" value="${esc(x.count)}"><input type="text" data-cm="${i}" data-k="doc" placeholder="근거(회의록 문서번호 등)" value="${esc(x.doc)}"></div></div>`).join('');
     const others = ST.meta.comm.filter((c) => !d.W9.rows.some((x) => x.name === c));
     return `<div class="it">${head}${detailHtml(id)}<p class="basis">2026 각종위원회 명단에서 선생님 직위·업무로 찾은 위원회예요. <b>3회 이상 활동한 위원회</b>만 체크하고 참석 횟수와 근거를 적어 주세요. 교무기획부가 내부기안으로 다시 확인합니다.</p>${rows || '<p class="hint">명단에서 찾은 위원회가 없어요. 아래에서 추가해 주세요.</p>'}
       <div class="grid2"><select id="cmAdd"><option value="">+ 위원회 추가(학운위 교원위원·인사자문 대표 등)</option>${others.map((c) => `<option>${esc(c)}</option>`).join('')}<option value="__">직접 입력</option></select><span></span></div>${fixAll(id)}</div>`;
   }
   if (id === 'W10') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}
-      <label class="chk"><input type="checkbox" data-in="W10.jaul.on" ${d.W10.jaul.on ? 'checked' : ''}> 자율동아리 운영(축제 부스, 지도 5회 이상, 운영결과 내부기안)</label><input type="text" data-in="W10.jaul.doc" placeholder="운영결과 내부기안 문서번호" value="${esc(d.W10.jaul.doc)}">
-      <label class="chk"><input type="checkbox" data-in="W10.gm.on" ${d.W10.gm.on ? 'checked' : ''}> 공모(목적)사업 담당자</label><div class="grid2"><input type="text" data-in="W10.gm.memo" placeholder="사업명" value="${esc(d.W10.gm.memo)}"><input type="text" data-in="W10.gm.doc" placeholder="신청·선정 공문 문서번호" value="${esc(d.W10.gm.doc)}"></div>${fixAll(id)}</div>`;
+      <label class="chk"><input type="checkbox" data-in="W10.jaul.on" ${d.W10.jaul.on ? 'checked' : ''}> 자율동아리 운영(축제 부스, 지도 5회 이상, 운영결과 내부기안)</label>${d.W10.jaul.auto ? AUTOTAG : ''}<input type="text" data-in="W10.jaul.doc" placeholder="운영결과 내부기안 문서번호" value="${esc(d.W10.jaul.doc)}">
+      <label class="chk"><input type="checkbox" data-in="W10.gm.on" ${d.W10.gm.on ? 'checked' : ''}> 공모(목적)사업 담당자</label>${d.W10.gm.auto ? AUTOTAG : ''}<div class="grid2"><input type="text" data-in="W10.gm.memo" placeholder="사업명" value="${esc(d.W10.gm.memo)}"><input type="text" data-in="W10.gm.doc" placeholder="신청·선정 공문 문서번호" value="${esc(d.W10.gm.doc)}"></div>${fixAll(id)}</div>`;
   return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}${fixAll(id)}</div>`;
 }
 const SRF = [['grade', '담당 학년 및 학급'], ['subj', '담당 과목'], ['hr', '담임 여부'], ['duty', '담당 업무'], ['head', '보직교사 여부'], ['hours', '주당 수업시간 수'], ['open', '연간 수업공개 실적'], ['stu', '연간 학생 상담 실적'], ['par', '연간 학부모 상담 실적'], ['etc', '그 밖의 실적사항']];
@@ -378,10 +398,10 @@ function touch() { DIRTY = true; recalc(); }
 function bind() {
   const root = $('main');
   root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); const d = $('l1d'); if (d) d.innerHTML = detailHtml('L1'); });
-  root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); touch(); });
+  root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); const pp = el.dataset.in.split('.'); pp.pop(); let o = ST.data; pp.forEach((k) => { o = o[k]; }); o.touched = true; touch(); });
   root.querySelectorAll('[data-ov]').forEach((el) => el.oninput = () => { const o = ST.data.ov[el.dataset.ov] = ST.data.ov[el.dataset.ov] || { on: true }; o[el.dataset.k] = el.value; touch(); });
   root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && id !== 'L1' && (o.score === undefined || o.score === '')) { o.on = false; o.score = itemScore(id); o.on = true; } render(); DIRTY = true; });
-  root.querySelectorAll('[data-cm]').forEach((el) => el.oninput = el.onchange = () => { const x = ST.data.W9.rows[+el.dataset.cm]; x[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; touch(); });
+  root.querySelectorAll('[data-cm]').forEach((el) => el.oninput = el.onchange = () => { const x = ST.data.W9.rows[+el.dataset.cm]; x[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; x.touched = true; touch(); });
   const ca = $('cmAdd'); if (ca) ca.onchange = () => { let v = ca.value; if (!v) return; if (v === '__') v = (prompt('위원회 이름') || '').trim(); if (v) ST.data.W9.rows.push({ name: v, as: '', on: true, count: '', doc: '' }); render(); DIRTY = true; };
   root.querySelectorAll('[data-ex]').forEach((el) => el.oninput = () => { ST.data.extra[+el.dataset.ex][el.dataset.k] = el.value; touch(); });
   root.querySelectorAll('[data-exdel]').forEach((el) => el.onclick = () => { ST.data.extra.splice(+el.dataset.exdel, 1); render(); DIRTY = true; });
@@ -403,6 +423,8 @@ async function login(nid) {
   if (!x.base) return { ok: false, error: 'nobase' };
   ST = { name: x.name, type: x.type, base: x.base, meta: x.meta || {}, work: x.work, status: x.status, savedAt: x.savedAt, submittedAt: x.submittedAt, deadline: x.deadline,
     data: Object.assign(newData(), x.data || {}), sr: x.sr || Object.assign({}, x.base.sr, { open: '', stu: '', par: '', etc: '' }) };
+  applyAuto(ST.data);
+  if (!x.sr && ST.data.L9.on) ST.sr.open = `전문적학습공동체 공개수업 1회(${ST.data.L9.date})`;
   return { ok: true, result: {} };
 }
 function validate(submit) {
