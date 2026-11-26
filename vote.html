@@ -57,6 +57,8 @@ footer a{color:var(--sub)}
 .opt input.custom{display:block;margin-top:8px;width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
 .opt input.custom:disabled{opacity:.45}
 .q .desc{white-space:pre-line}
+.pick-sel{display:block;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:6px 0 4px}
+.pick-sel:focus{outline:2px solid var(--brand);border-color:var(--brand)}
 .q.grid .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8px}
 @media(min-width:560px){.q.grid .opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .q.grid .opt{padding:9px 10px;margin:4px 0}
@@ -302,7 +304,10 @@ function renderQs() {
     const type = q.kind === 'multi' ? 'checkbox' : 'radio';
     const note = q.kind === 'multi' ? `<p class="desc">여러 개 고를 수 있어요${q.max ? ` (최대 ${q.max}개)` : ''}.</p>` : '';
     const grid = q.kind === 'single' && q.options.length >= 5 && !(q.details || []).some((d) => d && d.indexOf('【') >= 0);
-    return `<div class="q${grid ? ' grid' : ''}" data-no="${esc(q.no)}">${h}${note}<div class="opts">` + q.options.map((o, i) =>
+    // 후보가 많은 문항은 목록(드롭다운)에서 고르게 — 이름이 화면에 펼쳐지지 않도록(11/26 지시)
+    if (grid) return `<div class="q" data-no="${esc(q.no)}">${h}<select class="pick-sel" data-no="${esc(q.no)}"><option value="">선생님을 골라 주세요</option>`
+      + q.options.map((o, i) => `<option value="${esc(o)}">${esc(o)}${(q.details || [])[i] ? ' (' + esc(q.details[i]) + ')' : ''}</option>`).join('') + '</select></div>';
+    return `<div class="q" data-no="${esc(q.no)}">${h}${note}<div class="opts">` + q.options.map((o, i) =>
       { const rich = parseRich((q.details || [])[i]); return `<label class="opt${rich ? ' rich' : ''}"><input type="${type}" name="q${esc(q.no)}" value="${esc(o)}"><span class="ot">${rich ? '<span class="rh">' : ''}<b>${esc(o)}</b>${(q.last || []).includes(o) ? '<span class="last">2025학년도 방식</span>' : ''}${rich && rich.total ? `<span class="total">${esc(rich.total)}</span></span>` : (rich ? '</span>' : '')}`
       + (rich ? richHtml(rich) : ((q.details || [])[i] ? `<small>${esc(q.details[i])}</small>` : ''))
       + (o === CUSTOM ? `<input type="text" class="custom" data-no="${esc(q.no)}" maxlength="60" placeholder="예: 11명" disabled>` : '')
@@ -326,7 +331,8 @@ function collect() {
   for (const q of CFG.questions) {
     if (q.kind === 'text') a[q.no] = $('qs').querySelector(`textarea[data-no="${CSS.escape(q.no)}"]`).value.trim();
     else {
-      const v = [...$('qs').querySelectorAll(`input[name="q${CSS.escape(q.no)}"]:checked`)].map((x) => x.value);
+      const sel = $('qs').querySelector(`select[data-no="${CSS.escape(q.no)}"]`);
+      const v = sel ? (sel.value ? [sel.value] : []) : [...$('qs').querySelectorAll(`input[name="q${CSS.escape(q.no)}"]:checked`)].map((x) => x.value);
       const ci = v.indexOf(CUSTOM);
       if (ci >= 0) {
         const t = $('qs').querySelector(`input.custom[data-no="${CSS.escape(q.no)}"]`).value.trim();
