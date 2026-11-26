@@ -135,6 +135,7 @@ textarea{resize:vertical;margin-top:4px}
 table.adm{width:100%;border-collapse:collapse;font-size:13.5px}table.adm td,table.adm th{border-bottom:1px solid var(--line);padding:5px 4px;text-align:left}
 .inner{margin-top:12px;border:1px solid var(--line);border-radius:10px}
 .req{color:var(--bad);font-size:12px;margin-left:4px}
+.mini.fix{margin-top:6px}.mini.fix.on{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}.ro{font-size:15px}
 </style></head>
 <body>
 <div class="wrap">
@@ -231,7 +232,7 @@ function B(id) { return ST.base.items[id]; }
 function l1() {
   let t = 0; const rows = {};
   for (const s of B('L1').sems) {
-    const ov = ST.data.L1['h' + s.sem];
+    const on = (ST.data.ov.L1 && ST.data.ov.L1.on) || s.need, ov = on ? ST.data.L1['h' + s.sem] : undefined;
     const h = ov !== undefined && ov !== '' ? Number(ov) : (s.need ? null : s.hours);
     if (h == null || isNaN(h)) continue;
     const { sc, row } = bracket(h); const v = sc * s.months / 12;
@@ -248,20 +249,19 @@ function workAuto() {
 }
 function itemScore(id) {
   const d = ST.data;
+  if (id !== 'L1' && d.ov[id] && d.ov[id].on) return Number(d.ov[id].score) || 0;
   if (id === 'L1') return l1().total;
   if (id === 'L9') return d.L9.on ? 0.5 : 0;
   if (id === 'P2') return r2(Math.min(4, (B('P2').hours + d.extra.reduce((a, x) => a + (Number(x.hours) || 0), 0)) * 0.1));
-  if (id === 'W6') { const o = d.ov.W6; return o && o.on ? Number(o.score) || 0 : workAuto().score; }
+  if (id === 'W6') return workAuto().score;
   if (id === 'W9') return r2(Math.min(0.3, d.W9.rows.filter((x) => x.on && Number(x.count) >= 3).length * 0.1));
   if (id === 'W10') return (d.W10.jaul.on && d.W10.jaul.doc) || (d.W10.gm.on && d.W10.gm.doc) ? 0.25 : 0;
-  const o = d.ov[id]; return o && o.on ? Number(o.score) || 0 : B(id).score;
+  return B(id).score;
 }
 function areaScore(a) { return r2(a.base + a.items.reduce((s, id) => s + itemScore(id), 0)); }
 function total() { return r2(AREA.reduce((s, a) => s + areaScore(a), 0)); }
 function edits() {
-  const d = ST.data; let n = Object.values(d.ov).filter((o) => o.on).length;
-  n += Object.keys(d.L1).filter((k) => k.startsWith('h') && d.L1[k] !== '' && d.L1[k] !== undefined).length;
-  return n + d.extra.length;
+  const d = ST.data; return Object.values(d.ov).filter((o) => o.on).length + d.extra.length;
 }
 
 // ---------- 그리기 ----------
@@ -282,27 +282,31 @@ function ovHtml(id, unit = '점') {
   return `<div class="ovbox${o.on ? '' : ' hidden'}" id="ov_${id}"><label class="f">고친 점수(${unit})</label><input type="number" step="0.01" min="0" data-ov="${id}" data-k="score" value="${esc(o.score ?? '')}">
     <label class="f">고친 사유·근거</label><textarea rows="2" data-ov="${id}" data-k="reason" placeholder="예: 3월 담임 교체로 11개월">${esc(o.reason || '')}</textarea></div>`;
 }
+function fixBtn(id) { const o = ST.data.ov[id] || {}; return `<button type="button" class="mini fix${o.on ? ' on' : ''}" data-ovt="${id}">${o.on ? '고치기 취소(자동 값으로)' : '고치기'}</button>`; }
+function fixAll(id) { return fixBtn(id) + ovHtml(id); }
 function itemHtml(id) {
   const b = B(id), d = ST.data;
   const head = `<div class="ih"><span>${TITLE[id]}</span>${autoBadge(id)}</div>`;
   if (id === 'L1') {
+    const on = d.ov.L1 && d.ov.L1.on;
     const rows = b.sems.map((s) => {
-      const v = d.L1['h' + s.sem];
-      return `<div class="semrow"><span>${s.sem}학기 (${s.months}개월)</span><input type="number" step="0.5" min="0" data-l1="h${s.sem}" value="${esc(v ?? '')}" placeholder="${s.need ? '입력 필요' : s.hours}"><span class="unit">시간</span><small>${s.need ? '나이스 시간표에 없음 — 실제 주당 시수를 넣어 주세요' : esc(s.note || '나이스 시간표 ' + s.hours + '시간')}</small></div>`;
+      const v = d.L1['h' + s.sem], edit = on || s.need;
+      const auto = s.need ? '나이스 시간표에 없음 — 실제 주당 시수를 넣어 주세요' : (s.note || '나이스 시간표 ' + s.hours + '시간');
+      return `<div class="semrow"><span>${s.sem}학기 (${s.months}개월)</span>` + (edit ? `<input type="number" step="0.5" min="0" data-l1="h${s.sem}" value="${esc(v ?? '')}" placeholder="${s.need ? '입력 필요' : s.hours}"><span class="unit">시간</span>` : `<b class="ro">${s.hours}시간</b><span></span>`) + `<small>${esc(auto)}</small></div>`;
     }).join('');
-    return `<div class="it">${head}<p class="basis">${esc(b.basis)}. 다르면 숫자를 고치고 사유를 적어 주세요.</p>${b.warn ? `<div class="warnbox">${esc(b.warn)}</div>` : ''}${rows}
-      <textarea rows="2" data-l1="reason" placeholder="시수를 고쳤다면 사유(예: 1학기 4월부터 2시간 추가 담당)">${esc(d.L1.reason || '')}</textarea></div>`;
+    return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${b.warn ? `<div class="warnbox">${esc(b.warn)}</div>` : ''}${rows}
+      ${fixBtn('L1')}<div class="ovbox${on ? '' : ' hidden'}"><label class="f">고친 사유·근거</label><textarea rows="2" data-l1="reason" placeholder="예: 1학기 4월부터 2시간 추가 담당">${esc(d.L1.reason || '')}</textarea></div></div>`;
   }
   if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p><label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>
-      <div class="grid2"><input type="text" data-in="L9.date" placeholder="날짜 예: 6/12" value="${esc(d.L9.date)}"><input type="text" data-in="L9.doc" placeholder="문서번호 예: 구월중학교-12345" value="${esc(d.L9.doc)}"></div></div>`;
+      <div class="grid2"><input type="text" data-in="L9.date" placeholder="날짜 예: 6/12" value="${esc(d.L9.date)}"><input type="text" data-in="L9.doc" placeholder="문서번호 예: 구월중학교-12345" value="${esc(d.L9.doc)}"></div>${fixAll(id)}</div>`;
   if (id === 'P2') {
     const list = b.list.map((t) => `<li>${esc(t.name)} <small>${esc(t.org)} · ${esc(t.end)} · ${t.hours}시간</small></li>`).join('') || '<li class="hint">나이스에 2026. 1. 1. 이후 끝난 직무연수가 없어요</li>';
     const ex = d.extra.map((x, i) => `<div class="exrow"><input type="text" data-ex="${i}" data-k="name" placeholder="연수명" value="${esc(x.name)}"><input type="text" data-ex="${i}" data-k="org" placeholder="연수기관" value="${esc(x.org)}">
       <input type="text" data-ex="${i}" data-k="end" placeholder="이수일 예: 11/20" value="${esc(x.end)}"><input type="number" step="0.5" min="0" data-ex="${i}" data-k="hours" placeholder="시간" value="${esc(x.hours)}"><button type="button" class="mini" data-exdel="${i}">삭제</button></div>`).join('');
     return `<div class="it">${head}<p class="basis">${esc(b.basis)}. 40시간이면 만점(4점)이에요. <b>수강 중인 연수는 11. 30.(월)까지 이수를 마쳐 주세요.</b></p><ul class="tl">${list}</ul>
-      <div class="sub">나이스에 없는 연수(아직 안 올라간 연수 포함) — 이수증은 아래 「증빙 파일」에 올려 주세요</div>${ex}<button type="button" class="mini add" id="exAdd">+ 연수 추가</button></div>`;
+      <div class="sub">나이스에 없는 연수(아직 안 올라간 연수 포함) — 이수증은 아래 「증빙 파일」에 올려 주세요</div>${ex}<button type="button" class="mini add" id="exAdd">+ 연수 추가</button> ${fixAll(id)}</div>`;
   }
-  if (id === 'W6') { const o = d.ov.W6 || {}; return `<div class="it">${head}<p class="basis" id="w6note"></p>${B('W6').excluded ? '' : `<button type="button" class="mini" data-ovt="W6">${o.on ? '자동 값으로 되돌리기' : '고치기'}</button>${ovHtml('W6')}`}</div>`; }
+  if (id === 'W6') return `<div class="it">${head}<p class="basis" id="w6note"></p>${fixAll(id)}</div>`;
   if (id === 'W9') {
     const mine = b.comm.map((c) => c.name);
     if (!d.W9.rows.length) d.W9.rows = b.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
@@ -310,13 +314,12 @@ function itemHtml(id) {
       <div class="grid2"><input type="number" min="0" data-cm="${i}" data-k="count" placeholder="참석 횟수" value="${esc(x.count)}"><input type="text" data-cm="${i}" data-k="doc" placeholder="근거(회의록 문서번호 등)" value="${esc(x.doc)}"></div></div>`).join('');
     const others = ST.meta.comm.filter((c) => !d.W9.rows.some((x) => x.name === c));
     return `<div class="it">${head}<p class="basis">2026 각종위원회 명단에서 선생님 직위·업무로 찾은 위원회예요. <b>3회 이상 활동한 위원회</b>만 체크하고 참석 횟수와 근거를 적어 주세요. 교무기획부가 내부기안으로 다시 확인합니다.</p>${rows || '<p class="hint">명단에서 찾은 위원회가 없어요. 아래에서 추가해 주세요.</p>'}
-      <div class="grid2"><select id="cmAdd"><option value="">+ 위원회 추가(학운위 교원위원·인사자문 대표 등)</option>${others.map((c) => `<option>${esc(c)}</option>`).join('')}<option value="__">직접 입력</option></select><span></span></div></div>`;
+      <div class="grid2"><select id="cmAdd"><option value="">+ 위원회 추가(학운위 교원위원·인사자문 대표 등)</option>${others.map((c) => `<option>${esc(c)}</option>`).join('')}<option value="__">직접 입력</option></select><span></span></div>${fixAll(id)}</div>`;
   }
   if (id === 'W10') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>
       <label class="chk"><input type="checkbox" data-in="W10.jaul.on" ${d.W10.jaul.on ? 'checked' : ''}> 자율동아리 운영(축제 부스, 지도 5회 이상, 운영결과 내부기안)</label><input type="text" data-in="W10.jaul.doc" placeholder="운영결과 내부기안 문서번호" value="${esc(d.W10.jaul.doc)}">
-      <label class="chk"><input type="checkbox" data-in="W10.gm.on" ${d.W10.gm.on ? 'checked' : ''}> 공모(목적)사업 담당자</label><div class="grid2"><input type="text" data-in="W10.gm.memo" placeholder="사업명" value="${esc(d.W10.gm.memo)}"><input type="text" data-in="W10.gm.doc" placeholder="신청·선정 공문 문서번호" value="${esc(d.W10.gm.doc)}"></div></div>`;
-  const o = d.ov[id] || {};
-  return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p><button type="button" class="mini" data-ovt="${id}">${o.on ? '자동 값으로 되돌리기' : '고치기'}</button>${ovHtml(id)}</div>`;
+      <label class="chk"><input type="checkbox" data-in="W10.gm.on" ${d.W10.gm.on ? 'checked' : ''}> 공모(목적)사업 담당자</label><div class="grid2"><input type="text" data-in="W10.gm.memo" placeholder="사업명" value="${esc(d.W10.gm.memo)}"><input type="text" data-in="W10.gm.doc" placeholder="신청·선정 공문 문서번호" value="${esc(d.W10.gm.doc)}"></div>${fixAll(id)}</div>`;
+  return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${fixAll(id)}</div>`;
 }
 const SRF = [['grade', '담당 학년 및 학급'], ['subj', '담당 과목'], ['hr', '담임 여부'], ['duty', '담당 업무'], ['head', '보직교사 여부'], ['hours', '주당 수업시간 수'], ['open', '연간 수업공개 실적'], ['stu', '연간 학생 상담 실적'], ['par', '연간 학부모 상담 실적'], ['etc', '그 밖의 실적사항']];
 const SRT = [['g1', '학습지도 추진 목표', '학년 초에 계획했던 학습지도 목표'], ['r1', '학습지도 추진 실적', '목표와 대비한 추진 실적을 구체적으로'], ['g2', '생활지도 추진 목표', ''], ['r2', '생활지도 추진 실적', ''], ['g3', '전문성개발 추진 목표', ''], ['r3', '전문성개발 추진 실적', ''], ['g4', '담당 업무 추진 목표', ''], ['r4', '담당 업무 추진 실적', ''], ['cr', '창의적 업무개선 사항', '']];
@@ -349,7 +352,7 @@ function bind() {
   root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); });
   root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); touch(); });
   root.querySelectorAll('[data-ov]').forEach((el) => el.oninput = () => { const o = ST.data.ov[el.dataset.ov] = ST.data.ov[el.dataset.ov] || { on: true }; o[el.dataset.k] = el.value; touch(); });
-  root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && (o.score === undefined || o.score === '')) o.score = itemScore(id) || B(id).score || 0; render(); DIRTY = true; });
+  root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && id !== 'L1' && (o.score === undefined || o.score === '')) { o.on = false; o.score = itemScore(id); o.on = true; } render(); DIRTY = true; });
   root.querySelectorAll('[data-cm]').forEach((el) => el.oninput = el.onchange = () => { const x = ST.data.W9.rows[+el.dataset.cm]; x[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; touch(); });
   const ca = $('cmAdd'); if (ca) ca.onchange = () => { let v = ca.value; if (!v) return; if (v === '__') v = (prompt('위원회 이름') || '').trim(); if (v) ST.data.W9.rows.push({ name: v, as: '', on: true, count: '', doc: '' }); render(); DIRTY = true; };
   root.querySelectorAll('[data-ex]').forEach((el) => el.oninput = () => { ST.data.extra[+el.dataset.ex][el.dataset.k] = el.value; touch(); });
@@ -377,9 +380,8 @@ async function login(nid) {
 function validate(submit) {
   const d = ST.data, s = ST.sr, bad = [];
   B('L1').sems.forEach((x) => { const v = d.L1['h' + x.sem]; if (x.need && (v === undefined || v === '')) bad.push(`${x.sem}학기 주당 수업시수`); });
-  const l1changed = Object.keys(d.L1).some((k) => k.startsWith('h') && d.L1[k] !== '' && d.L1[k] !== undefined && !B('L1').sems.find((x) => 'h' + x.sem === k && x.need));
-  if (l1changed && !(d.L1.reason || '').trim()) bad.push('수업시수를 고친 사유');
-  Object.entries(d.ov).forEach(([id, o]) => { if (o.on && !(o.reason || '').trim()) bad.push(`${TITLE[id]} — 고친 사유`); });
+  if (d.ov.L1 && d.ov.L1.on && !(d.L1.reason || '').trim()) bad.push('수업시수를 고친 사유');
+  Object.entries(d.ov).forEach(([id, o]) => { if (id !== 'L1' && o.on && !(o.reason || '').trim()) bad.push(`${TITLE[id]} — 고친 사유`); });
   if (d.L9.on && !d.L9.doc && !d.L9.date) bad.push('수업 공개 날짜 또는 문서번호');
   d.W9.rows.forEach((x) => { if (x.on && (!(Number(x.count) >= 3) || !x.doc)) bad.push(`${x.name} — 3회 이상 횟수와 근거`); });
   if (d.W10.jaul.on && !d.W10.jaul.doc) bad.push('자율동아리 운영결과 문서번호');
