@@ -314,7 +314,7 @@ function l1Detail() {
   for (const x of b.sems) {
     const cls = (x.classes || []);
     const grp = {}; cls.forEach((c) => { const [hb, ...rest] = c.split(' '); const h = rest.pop(); const sub = rest.join(' '); (grp[sub] = grp[sub] || []).push(`${hb}(${h})`); });
-    out.push(`<b>${x.sem}학기</b> 나이스 편성 시간표: ` + (cls.length ? Object.entries(grp).map(([k, v]) => `${esc(k)} ${v.join(' ')}`).join(' · ') + ` = 주당 <b>${x.raw}시간</b>` : '담당 수업 없음'));
+    out.push(`<b>${x.sem}학기</b> 나이스 편성 시간표: ` + (x.need && !cls.length ? '이 학기 시수가 나이스 학급 시간표에 없음(특수학급·계약 기간 등) — 실제 주당 시수를 넣어 주세요' : '') + (cls.length ? Object.entries(grp).map(([k, v]) => `${esc(k)} ${v.join(' ')}`).join(' · ') + ` = 주당 <b>${x.raw}시간</b>` : (x.need ? '' : '담당 수업 없음')));
     if (x.note) out.push(esc(x.note));
     const ov = (on || x.need) ? ST.data.L1['h' + x.sem] : undefined;
     const h = ov !== undefined && ov !== '' ? Number(ov) : (x.need ? null : x.hours);
@@ -388,6 +388,14 @@ function renderFiles() {
     <ul class="tl">${f.map((x, i) => `<li>${esc(x.name)} <small>${Math.round(x.size / 1024)}KB ${x.memo ? '· ' + esc(x.memo) : ''}</small> <button type="button" class="mini" data-fdel="${i}">목록에서 빼기</button></li>`).join('') || '<li class="hint">올린 파일 없음</li>'}</ul>
     <div class="grid2"><input type="text" id="fMemo" placeholder="무엇의 근거인지 예: ○○연수 이수증"><input type="file" id="fInput"></div><button type="button" class="btn ghost" id="fUp">올리기</button><div id="mFile"></div>`;
 }
+// 시수를 입력·고치면 자기실적평가서 '주당 수업시간 수'도 같이(본인이 그 칸을 직접 고쳤으면 그대로 둠)
+function syncHours() {
+  if (ST.sr.hoursTouched) return;
+  const on = ST.data.ov.L1 && ST.data.ov.L1.on;
+  const parts = B('L1').sems.map((x) => { const v = (on || x.need) ? ST.data.L1['h' + x.sem] : undefined; const h = v !== undefined && v !== '' ? v : (x.need ? '' : x.raw); return h !== '' && h != null ? `${x.sem}학기 ${h}시간` : ''; }).filter(Boolean);
+  ST.sr.hours = parts.join(' / ');
+  const el = document.querySelector('[data-sr="hours"]'); if (el) el.value = ST.sr.hours;
+}
 function recalc() {
   for (const a of AREA) {
     for (const id of a.items) { const el = $('sc_' + id); if (el) { const v = itemScore(id); el.textContent = v ? `+${v}` : '0'; el.className = 'sc' + (v ? ' pos' : ''); } }
@@ -400,7 +408,7 @@ function setPath(obj, path, val) { const p = path.split('.'); let o = obj; for (
 function touch() { DIRTY = true; recalc(); }
 function bind() {
   const root = $('main');
-  root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); const d = $('l1d'); if (d) d.innerHTML = detailHtml('L1'); });
+  root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); const d = $('l1d'); if (d) d.innerHTML = detailHtml('L1'); syncHours(); });
   root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); const pp = el.dataset.in.split('.'); pp.pop(); let o = ST.data; pp.forEach((k) => { o = o[k]; }); o.touched = true; touch(); });
   root.querySelectorAll('[data-ov]').forEach((el) => el.oninput = () => { const o = ST.data.ov[el.dataset.ov] = ST.data.ov[el.dataset.ov] || { on: true }; o[el.dataset.k] = el.value; touch(); });
   root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && id !== 'L1' && (o.score === undefined || o.score === '')) { o.on = false; o.score = itemScore(id); o.on = true; } render(); DIRTY = true; });
@@ -409,7 +417,7 @@ function bind() {
   root.querySelectorAll('[data-ex]').forEach((el) => el.oninput = () => { ST.data.extra[+el.dataset.ex][el.dataset.k] = el.value; touch(); });
   root.querySelectorAll('[data-exdel]').forEach((el) => el.onclick = () => { ST.data.extra.splice(+el.dataset.exdel, 1); render(); DIRTY = true; });
   const ea = $('exAdd'); if (ea) ea.onclick = () => { ST.data.extra.push({ name: '', org: '', end: '', hours: '' }); render(); DIRTY = true; };
-  root.querySelectorAll('[data-sr]').forEach((el) => el.oninput = el.onchange = () => { if (el.type === 'radio' && !el.checked) return; ST.sr[el.dataset.sr] = el.value; DIRTY = true; });
+  root.querySelectorAll('[data-sr]').forEach((el) => el.oninput = el.onchange = () => { if (el.type === 'radio' && !el.checked) return; ST.sr[el.dataset.sr] = el.value; if (el.dataset.sr === 'hours') ST.sr.hoursTouched = true; DIRTY = true; });
   root.querySelectorAll('[data-fdel]').forEach((el) => el.onclick = () => { ST.data.files.splice(+el.dataset.fdel, 1); renderFiles(); bind(); DIRTY = true; });
   const fu = $('fUp'); if (fu) fu.onclick = upload;
 }
