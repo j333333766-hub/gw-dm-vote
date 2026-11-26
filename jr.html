@@ -136,6 +136,7 @@ table.adm{width:100%;border-collapse:collapse;font-size:13.5px}table.adm td,tabl
 .inner{margin-top:12px;border:1px solid var(--line);border-radius:10px}
 .req{color:var(--bad);font-size:12px;margin-left:4px}
 .mini.fix{margin-top:6px}.mini.fix.on{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}.ro{font-size:15px}
+ul.detail{margin:4px 0 8px;padding:8px 12px 8px 26px;background:var(--bg);border:1px solid var(--line);border-radius:9px;font-size:12.8px;line-height:1.6;color:var(--ink)}ul.detail li{margin:2px 0;word-break:keep-all}ul.detail b{color:var(--brand)}
 </style></head>
 <body>
 <div class="wrap">
@@ -282,6 +283,28 @@ function ovHtml(id, unit = '점') {
   return `<div class="ovbox${o.on ? '' : ' hidden'}" id="ov_${id}"><label class="f">고친 점수(${unit})</label><input type="number" step="0.01" min="0" data-ov="${id}" data-k="score" value="${esc(o.score ?? '')}">
     <label class="f">고친 사유·근거</label><textarea rows="2" data-ov="${id}" data-k="reason" placeholder="예: 3월 담임 교체로 11개월">${esc(o.reason || '')}</textarea></div>`;
 }
+const BRT = ['22시간 이상 28.5점', '21~22시간 28점', '20~21시간 27.5점', '19~20시간 27점', '18~19시간 26.5점', '17~18시간 26점', '17시간 미만 25.5점'];
+function l1Detail() {
+  const b = B('L1'), on = ST.data.ov.L1 && ST.data.ov.L1.on, out = [];
+  for (const x of b.sems) {
+    const cls = (x.classes || []);
+    const grp = {}; cls.forEach((c) => { const [hb, ...rest] = c.split(' '); const h = rest.pop(); const sub = rest.join(' '); (grp[sub] = grp[sub] || []).push(`${hb}(${h})`); });
+    out.push(`<b>${x.sem}학기</b> 나이스 편성 시간표: ` + (cls.length ? Object.entries(grp).map(([k, v]) => `${esc(k)} ${v.join(' ')}`).join(' · ') + ` = 주당 <b>${x.raw}시간</b>` : '담당 수업 없음'));
+    if (x.note) out.push(esc(x.note));
+    const ov = (on || x.need) ? ST.data.L1['h' + x.sem] : undefined;
+    const h = ov !== undefined && ov !== '' ? Number(ov) : (x.need ? null : x.hours);
+    if (h == null || isNaN(h)) { out.push(`${x.sem}학기 시수 입력 필요`); continue; }
+    const k = bracket(h); const ri = k.row - 8;
+    out.push(`→ ${h}시간 = ${ri + 1}번 구간(${BRT[ri]}) × 근무 ${x.months}개월/12 = <b>${r2(k.sc * x.months / 12)}점</b>` + (ov !== undefined && ov !== '' ? ' (고친 시수)' : ''));
+  }
+  out.push('합계 = 학기별 (구간 점수 × 근무 개월/12)의 합 · 시간표 바뀜·결보강은 반영 안 됨, 다르면 「고치기」');
+  return out;
+}
+function detailHtml(id) {
+  const lines = id === 'L1' ? l1Detail() : (B(id).detail || []).map(esc);
+  if (id === 'W6') { const w = workAuto(); lines.push(esc(w.note)); }
+  return lines.length ? `<ul class="detail">${lines.map((x) => `<li>${x}</li>`).join('')}</ul>` : '';
+}
 function fixBtn(id) { const o = ST.data.ov[id] || {}; return `<button type="button" class="mini fix${o.on ? ' on' : ''}" data-ovt="${id}">${o.on ? '고치기 취소(자동 값으로)' : '고치기'}</button>`; }
 function fixAll(id) { return fixBtn(id) + ovHtml(id); }
 function itemHtml(id) {
@@ -294,32 +317,32 @@ function itemHtml(id) {
       const auto = s.need ? '나이스 시간표에 없음 — 실제 주당 시수를 넣어 주세요' : (s.note || '나이스 시간표 ' + s.hours + '시간');
       return `<div class="semrow"><span>${s.sem}학기 (${s.months}개월)</span>` + (edit ? `<input type="number" step="0.5" min="0" data-l1="h${s.sem}" value="${esc(v ?? '')}" placeholder="${s.need ? '입력 필요' : s.hours}"><span class="unit">시간</span>` : `<b class="ro">${s.hours}시간</b><span></span>`) + `<small>${esc(auto)}</small></div>`;
     }).join('');
-    return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${b.warn ? `<div class="warnbox">${esc(b.warn)}</div>` : ''}${rows}
+    return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${b.warn ? `<div class="warnbox">${esc(b.warn)}</div>` : ''}<div id="l1d">${detailHtml('L1')}</div>${rows}
       ${fixBtn('L1')}<div class="ovbox${on ? '' : ' hidden'}"><label class="f">고친 사유·근거</label><textarea rows="2" data-l1="reason" placeholder="예: 1학기 4월부터 2시간 추가 담당">${esc(d.L1.reason || '')}</textarea></div></div>`;
   }
-  if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p><label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>
+  if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}<label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>
       <div class="grid2"><input type="text" data-in="L9.date" placeholder="날짜 예: 6/12" value="${esc(d.L9.date)}"><input type="text" data-in="L9.doc" placeholder="문서번호 예: 구월중학교-12345" value="${esc(d.L9.doc)}"></div>${fixAll(id)}</div>`;
   if (id === 'P2') {
     const list = b.list.map((t) => `<li>${esc(t.name)} <small>${esc(t.org)} · ${esc(t.end)} · ${t.hours}시간</small></li>`).join('') || '<li class="hint">나이스에 2026. 1. 1. 이후 끝난 직무연수가 없어요</li>';
     const ex = d.extra.map((x, i) => `<div class="exrow"><input type="text" data-ex="${i}" data-k="name" placeholder="연수명" value="${esc(x.name)}"><input type="text" data-ex="${i}" data-k="org" placeholder="연수기관" value="${esc(x.org)}">
       <input type="text" data-ex="${i}" data-k="end" placeholder="이수일 예: 11/20" value="${esc(x.end)}"><input type="number" step="0.5" min="0" data-ex="${i}" data-k="hours" placeholder="시간" value="${esc(x.hours)}"><button type="button" class="mini" data-exdel="${i}">삭제</button></div>`).join('');
-    return `<div class="it">${head}<p class="basis">${esc(b.basis)}. 40시간이면 만점(4점)이에요. <b>수강 중인 연수는 11. 30.(월)까지 이수를 마쳐 주세요.</b></p><ul class="tl">${list}</ul>
+    return `<div class="it">${head}${detailHtml(id)}<p class="basis">${esc(b.basis)}. 40시간이면 만점(4점)이에요. <b>수강 중인 연수는 11. 30.(월)까지 이수를 마쳐 주세요.</b></p><ul class="tl">${list}</ul>
       <div class="sub">나이스에 없는 연수(아직 안 올라간 연수 포함) — 이수증은 아래 「증빙 파일」에 올려 주세요</div>${ex}<button type="button" class="mini add" id="exAdd">+ 연수 추가</button> ${fixAll(id)}</div>`;
   }
-  if (id === 'W6') return `<div class="it">${head}<p class="basis" id="w6note"></p>${fixAll(id)}</div>`;
+  if (id === 'W6') return `<div class="it">${head}<p class="basis" id="w6note"></p>${detailHtml(id)}${fixAll(id)}</div>`;
   if (id === 'W9') {
     const mine = b.comm.map((c) => c.name);
     if (!d.W9.rows.length) d.W9.rows = b.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
     const rows = d.W9.rows.map((x, i) => `<div class="cmrow"><label class="chk"><input type="checkbox" data-cm="${i}" data-k="on" ${x.on ? 'checked' : ''}> <b>${esc(x.name)}</b> ${x.as ? `<small>명단상: ${esc(x.as)}</small>` : '<small>직접 추가</small>'}</label>
       <div class="grid2"><input type="number" min="0" data-cm="${i}" data-k="count" placeholder="참석 횟수" value="${esc(x.count)}"><input type="text" data-cm="${i}" data-k="doc" placeholder="근거(회의록 문서번호 등)" value="${esc(x.doc)}"></div></div>`).join('');
     const others = ST.meta.comm.filter((c) => !d.W9.rows.some((x) => x.name === c));
-    return `<div class="it">${head}<p class="basis">2026 각종위원회 명단에서 선생님 직위·업무로 찾은 위원회예요. <b>3회 이상 활동한 위원회</b>만 체크하고 참석 횟수와 근거를 적어 주세요. 교무기획부가 내부기안으로 다시 확인합니다.</p>${rows || '<p class="hint">명단에서 찾은 위원회가 없어요. 아래에서 추가해 주세요.</p>'}
+    return `<div class="it">${head}${detailHtml(id)}<p class="basis">2026 각종위원회 명단에서 선생님 직위·업무로 찾은 위원회예요. <b>3회 이상 활동한 위원회</b>만 체크하고 참석 횟수와 근거를 적어 주세요. 교무기획부가 내부기안으로 다시 확인합니다.</p>${rows || '<p class="hint">명단에서 찾은 위원회가 없어요. 아래에서 추가해 주세요.</p>'}
       <div class="grid2"><select id="cmAdd"><option value="">+ 위원회 추가(학운위 교원위원·인사자문 대표 등)</option>${others.map((c) => `<option>${esc(c)}</option>`).join('')}<option value="__">직접 입력</option></select><span></span></div>${fixAll(id)}</div>`;
   }
-  if (id === 'W10') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>
+  if (id === 'W10') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}
       <label class="chk"><input type="checkbox" data-in="W10.jaul.on" ${d.W10.jaul.on ? 'checked' : ''}> 자율동아리 운영(축제 부스, 지도 5회 이상, 운영결과 내부기안)</label><input type="text" data-in="W10.jaul.doc" placeholder="운영결과 내부기안 문서번호" value="${esc(d.W10.jaul.doc)}">
       <label class="chk"><input type="checkbox" data-in="W10.gm.on" ${d.W10.gm.on ? 'checked' : ''}> 공모(목적)사업 담당자</label><div class="grid2"><input type="text" data-in="W10.gm.memo" placeholder="사업명" value="${esc(d.W10.gm.memo)}"><input type="text" data-in="W10.gm.doc" placeholder="신청·선정 공문 문서번호" value="${esc(d.W10.gm.doc)}"></div>${fixAll(id)}</div>`;
-  return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${fixAll(id)}</div>`;
+  return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}${fixAll(id)}</div>`;
 }
 const SRF = [['grade', '담당 학년 및 학급'], ['subj', '담당 과목'], ['hr', '담임 여부'], ['duty', '담당 업무'], ['head', '보직교사 여부'], ['hours', '주당 수업시간 수'], ['open', '연간 수업공개 실적'], ['stu', '연간 학생 상담 실적'], ['par', '연간 학부모 상담 실적'], ['etc', '그 밖의 실적사항']];
 const SRT = [['g1', '학습지도 추진 목표', '학년 초에 계획했던 학습지도 목표'], ['r1', '학습지도 추진 실적', '목표와 대비한 추진 실적을 구체적으로'], ['g2', '생활지도 추진 목표', ''], ['r2', '생활지도 추진 실적', ''], ['g3', '전문성개발 추진 목표', ''], ['r3', '전문성개발 추진 실적', ''], ['g4', '담당 업무 추진 목표', ''], ['r4', '담당 업무 추진 실적', ''], ['cr', '창의적 업무개선 사항', '']];
@@ -349,7 +372,7 @@ function setPath(obj, path, val) { const p = path.split('.'); let o = obj; for (
 function touch() { DIRTY = true; recalc(); }
 function bind() {
   const root = $('main');
-  root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); });
+  root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); const d = $('l1d'); if (d) d.innerHTML = detailHtml('L1'); });
   root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); touch(); });
   root.querySelectorAll('[data-ov]').forEach((el) => el.oninput = () => { const o = ST.data.ov[el.dataset.ov] = ST.data.ov[el.dataset.ov] || { on: true }; o[el.dataset.k] = el.value; touch(); });
   root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && id !== 'L1' && (o.score === undefined || o.score === '')) { o.on = false; o.score = itemScore(id); o.on = true; } render(); DIRTY = true; });
@@ -439,7 +462,7 @@ function setCell(doc, ref, val) {
   if (typeof val === 'number') { c.removeAttribute('t'); const v = doc.createElementNS(NS_X, 'v'); v.textContent = String(val); c.appendChild(v); }
   else { c.setAttribute('t', 'inlineStr'); const is = doc.createElementNS(NS_X, 'is'), t = doc.createElementNS(NS_X, 't'); t.textContent = val; is.appendChild(t); c.appendChild(is); }
 }
-async function tpl(name) { const r = await fetch('jr/tpl/' + encodeURIComponent(name) + '?v=2'); if (!r.ok) throw new Error('tpl'); return JSZip.loadAsync(await r.arrayBuffer()); }
+async function tpl(name) { const r = await fetch('jr/tpl/' + encodeURIComponent(name) + '?v=3'); if (!r.ok) throw new Error('tpl'); return JSZip.loadAsync(await r.arrayBuffer()); }
 function dl(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
 async function makeXlsx() {
   const z = await tpl('정량평가표_양식.xlsx');
@@ -484,6 +507,9 @@ async function makeHwpx() {
   const z = await tpl('자기실적평가서_양식.hwpx');
   const p = 'Contents/section0.xml', doc = new DOMParser().parseFromString(await z.file(p).async('string'), 'application/xml');
   const s = ST.sr, ps = [...doc.getElementsByTagNameNS(NS_H, 'p')];
+  // 원본 양식은 표가 '글자처럼 취급'이라 한 쪽을 넘으면 잘려 보인다 → 글이 길 때만 쪽 넘김 허용(모양은 같음)
+  const est = SRT.reduce((a, [k]) => a + String(s[k] || '').split('\n').reduce((b2, ln) => b2 + Math.max(1, Math.ceil(ln.length / 40)), 0), 0);
+  if (est > 12) { const pos = doc.getElementsByTagNameNS(NS_H, 'pos')[0]; if (pos) pos.setAttribute('treatAsChar', '0'); }
   const after = { '○ 소속': '구월중학교', '○ 직위': '교사', '○ 성명': ST.name };
   SRF.forEach(([k, t]) => { after['○ ' + t] = s[k] || ''; });
   const blocks = { '○ 학습지도 추진 목표': 'g1', '○ 학습지도 추진 실적': 'r1', '○ 생활지도 추진 목표': 'g2', '○ 생활지도 추진 실적': 'r2', '○ 전문성개발 추진 목표': 'g3', '○ 전문성개발 추진 실적': 'r3', '○ 담당 업무 추진 목표': 'g4', '○ 담당 업무 추진 실적': 'r4', '○ 창의적 업무개선 사항': 'cr' };
