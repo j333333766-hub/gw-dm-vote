@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>정량평가·자기실적평가서</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1d2433;--sub:#5d6678;--line:#e1e5ec;--brand:#2453c7;--brand-ink:#fff;--soft:#eaf0fd;--ok:#1f8a4c;--okbg:#e6f5ec;--warn:#b25b00;--warnbg:#fff3e0;--bad:#c62828;--badbg:#fdecec}
+@media (prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1b2029;--ink:#e8ebf1;--sub:#a3abba;--line:#2c3340;--brand:#6f9bff;--brand-ink:#0d1220;--soft:#1f2a44;--ok:#5fd18f;--okbg:#14301f;--warn:#ffb35c;--warnbg:#33240f;--bad:#ff7b7b;--badbg:#3a1717}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Malgun Gothic",sans-serif;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+header h1{font-size:21px;margin:4px 0 6px;line-height:1.35;word-break:keep-all}
+.school{color:var(--sub);font-size:14px;font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 4px;font-size:14px;color:var(--sub)}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.b-open{background:var(--okbg);color:var(--ok)}.b-wait{background:var(--warnbg);color:var(--warn)}.b-off{background:var(--badbg);color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.guide{white-space:pre-line;font-size:14.5px;color:var(--sub)}
+.vcard{border:2px solid var(--brand)}.vcard h2{font-size:18px;margin-bottom:12px;word-break:keep-all}
+.vcard .nidbox .pre{font-size:22px;padding:0 16px}.vcard #nid{font-size:22px;padding:14px 12px;letter-spacing:3px}
+.btn.big{padding:16px;font-size:18px}
+h2{font-size:17px;margin:0 0 12px}
+label.f{display:block;font-weight:600;margin:12px 0 6px;font-size:15px}
+input[type=text],input[type=password],textarea{width:100%;font:inherit;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px}
+.hint{font-size:13px;color:var(--sub);margin-top:4px}
+button{font:inherit;cursor:pointer}
+.btn{display:block;width:100%;margin-top:16px;padding:13px;border:0;border-radius:10px;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:16px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}
+.row2{display:flex;gap:10px}.row2 .btn{margin-top:16px}
+.q{border-top:1px solid var(--line);padding:16px 0 4px}.q:first-of-type{border-top:0;padding-top:0}
+.q h3{font-size:16px;margin:0 0 4px;word-break:keep-all}
+.q .no{color:var(--brand);margin-right:4px}
+.req{color:var(--bad);font-size:13px;margin-left:4px}
+.q .desc{font-size:13.5px;color:var(--sub);margin:0 0 8px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin:8px 0;cursor:pointer;background:var(--bg)}
+.opt input{margin-top:4px;width:18px;height:18px;flex:none;accent-color:var(--brand)}
+.opt.on{border-color:var(--brand);background:var(--soft)}
+.msg{padding:11px 13px;border-radius:10px;margin-top:12px;font-size:14.5px}
+.msg.err{background:var(--badbg);color:var(--bad)}.msg.ok{background:var(--okbg);color:var(--ok)}.msg.info{background:var(--soft);color:var(--ink)}
+.sum dt{font-weight:700;font-size:14px;margin-top:10px}.sum dd{margin:2px 0 0;color:var(--sub);font-size:14.5px}
+.center{text-align:center}.big{font-size:44px;line-height:1}
+.hidden{display:none!important}
+footer{text-align:center;font-size:12.5px;color:var(--sub);margin-top:28px}
+footer a{color:var(--sub)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:var(--brand)}
+.tl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chips span{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
+.last{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:12px;font-weight:700;vertical-align:1px;white-space:nowrap}
+.nidbox{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.nidbox:focus-within{outline:2px solid var(--brand);outline-offset:1px}
+.nidbox .pre{display:flex;align-items:center;padding:0 12px;font-weight:700;font-size:17px;color:var(--ink);background:var(--soft);border-right:1px solid var(--line)}
+.nidbox input{border:0;border-radius:0;outline:none!important;letter-spacing:2px}
+.opt .ot{display:block;flex:1;min-width:0}.opt .ot b{font-weight:600}
+.opt small{display:block;color:var(--sub);font-size:13px;line-height:1.5;margin-top:3px;word-break:keep-all}
+.opt input.custom{display:block;margin-top:8px;width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.opt input.custom:disabled{opacity:.45}
+.q .desc{white-space:pre-line}
+.pick-sel{display:block;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:6px 0 4px}
+.jbhead{margin:22px 0 4px;padding:12px 14px;border-radius:10px;background:var(--warnbg);font-size:13.5px;line-height:1.6;word-break:keep-all}.jbhead b{color:var(--warn)}.jbhead>b{display:block;font-size:15px;margin-bottom:4px}
+.grp{margin:10px 0 2px}.gk{font-size:13px;font-weight:700;color:var(--brand);margin:0 0 2px}
+.gopts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 6px}@media(min-width:560px){.gopts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.opt.sm{padding:8px 9px;margin:3px 0;font-size:13.5px;gap:7px;align-items:center}.opt.sm input{margin-top:0;width:16px;height:16px}.opt.sm .ot{word-break:keep-all;line-height:1.35}
+.desc.cnt{font-weight:700;color:var(--brand)}
+.pick-sel:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+.q.grid .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8px}
+@media(min-width:560px){.q.grid .opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.q.grid .opt{padding:9px 10px;margin:4px 0}
+.q.grid .opt small{font-size:12px;margin-top:1px}
+.pick td,.pick th{padding:6px 6px;border-bottom:1px solid var(--line);font-size:14px;text-align:left;vertical-align:top}
+.pick{width:100%;border-collapse:collapse}.pick .warn{color:var(--warn);font-weight:700}
+.more{padding:0;overflow:hidden}
+.more summary{list-style:none;cursor:pointer;padding:14px 18px;font-weight:700;font-size:15.5px;color:var(--brand);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.more summary::-webkit-details-marker{display:none}
+.more summary .tap{flex:none;font-size:12.5px;font-weight:600;color:var(--brand);border:1px solid var(--brand);border-radius:999px;padding:1px 9px}
+.more summary .tap::after{content:'눌러서 보기'}.more[open] summary .tap::after{content:'접기'}
+.more[open] summary{border-bottom:1px solid var(--line)}
+.more-body{padding:4px 18px 16px;font-size:14.5px}
+.more-body h4{font-size:15px;margin:16px 0 6px}
+.more-body ul{margin:0;padding-left:18px}.more-body li{margin:4px 0}
+.more-body p{margin:6px 0}
+.mini{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+.mini th,.mini td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.mini th{background:var(--bg);white-space:nowrap}.mini td.n{text-align:right;white-space:nowrap;font-weight:700}
+.mini tr.t th,.mini tr.t td{background:var(--soft)}
+.more .src{font-size:12.5px;color:var(--sub);margin-top:12px}
+.school{display:flex;align-items:center;gap:8px}
+.school .emblem{width:28px;height:28px;flex:none}
+/* 구성 방식 선택지: 자리 칸·범례·추천 칸 */
+:root{--s0:#9aa3b5;--s1:#2f6fdb;--s2:#e07b39;--s3:#2a9d8f;--s4:#8e5cd9;--s5:#c99400;--s6:#3f8f3a;--sm:#8d6e63;--sf:#d0567f}
+@media (prefers-color-scheme:dark){:root{--s0:#6c7487;--s1:#6f9bff;--s2:#ff9f5c;--s3:#4fc4b5;--s4:#b58cff;--s5:#f0c040;--s6:#6fcf68;--sm:#c4a295;--sf:#ff8fb5}}
+.opt.rich{flex-direction:row}
+.rh{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.rh b{font-size:16px}
+.total{margin-left:auto;font-weight:800;font-size:15px;color:var(--brand);background:var(--soft);border-radius:999px;padding:1px 10px}
+.seats{display:flex;gap:3px;margin:10px 0 8px}
+.seats i{flex:1;height:20px;border-radius:5px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px 2px 6px;white-space:nowrap}
+.legend span i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.legend span em{font-style:normal;font-weight:800}
+.legend span.fix{color:var(--sub)}
+.rec{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.rec .rt{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.rec .rt em{font-style:normal;color:var(--brand)}
+.rec ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}
+.rec li{font-size:13px;background:var(--soft);border-radius:999px;padding:2px 10px;word-break:keep-all}
+.note{display:block;font-size:12.5px;color:var(--sub);line-height:1.5;margin-top:8px;word-break:keep-all}
+.texts p{background:var(--bg);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px;white-space:pre-line}
+.tabs{display:flex;gap:6px;margin:10px 0 2px;flex-wrap:wrap}.tabs a{font-size:13.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--sub);text-decoration:none;background:var(--card)}.tabs a.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:700}
+.chip{font-size:12.5px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--brand);font-weight:700}
+.whorow{display:flex;justify-content:space-between;align-items:center;gap:8px}.whorow b{font-size:18px}
+.sumgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:10px}.sumgrid div{background:var(--soft);border-radius:10px;padding:6px 4px;text-align:center}.sumgrid small{display:block;font-size:11.5px;color:var(--sub);word-break:keep-all;line-height:1.3}.sumgrid b{font-size:16px}.sumgrid .tot{background:var(--brand);color:var(--brand-ink)}.sumgrid .tot small{color:var(--brand-ink)}
+.area h2{display:flex;justify-content:space-between;align-items:baseline;font-size:17px;margin:0 0 6px}.asc{font-size:14px;color:var(--brand)}
+.it{border-top:1px solid var(--line);padding:12px 0 6px}.it.fixed{padding:8px 0}.ih{display:flex;justify-content:space-between;gap:8px;font-weight:600;font-size:15px;word-break:keep-all}
+.sc{flex:none;min-width:44px;text-align:right;color:var(--sub)}.sc.pos{color:var(--ok)}
+.basis{font-size:13px;color:var(--sub);margin:3px 0 6px;line-height:1.55;word-break:keep-all}
+.warnbox{margin:6px 0;padding:8px 11px;border-radius:9px;background:var(--warnbg);color:var(--warn);font-size:13px;font-weight:600;word-break:keep-all}
+.semrow{display:grid;grid-template-columns:auto 90px auto;gap:4px 8px;align-items:center;margin:6px 0}.semrow small{grid-column:1/-1;color:var(--sub);font-size:12.5px}.semrow .unit{font-size:13px;color:var(--sub)}
+input[type=text],input[type=number],input[type=password],textarea,select{width:100%;font:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+textarea{resize:vertical;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:6px 0;word-break:keep-all}.chk input{margin-top:4px;width:17px;height:17px;flex:none;accent-color:var(--brand)}.chk small{color:var(--sub)}
+.mini{font:inherit;font-size:12.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--brand);background:transparent;color:var(--brand);cursor:pointer;margin:2px 0}.mini.add{margin-top:6px}
+.ovbox{margin:6px 0;padding:10px;border-radius:10px;background:var(--soft)}
+.exrow{display:grid;grid-template-columns:2fr 1.4fr 1fr .8fr auto;gap:5px;margin:5px 0;align-items:center}
+@media(max-width:520px){.exrow{grid-template-columns:1fr 1fr}.sumgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tl{margin:4px 0 6px;padding-left:18px;font-size:13.5px}.tl li{margin:3px 0}.tl small{color:var(--sub)}
+.sub{font-size:13px;font-weight:700;margin-top:8px}
+.cmrow{padding:6px 0;border-bottom:1px dashed var(--line)}
+.srgrid{display:grid;grid-template-columns:150px 1fr;gap:6px 10px;align-items:center;margin-bottom:8px}.srgrid label.f{margin:0}
+@media(max-width:520px){.srgrid{grid-template-columns:1fr}}
+.evrow{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}.evrow>span{width:84px;font-weight:600;font-size:14px}.pill{font-size:14px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;cursor:pointer}.pill input{accent-color:var(--brand)}
+.actions .row2{margin-top:6px}
+table.adm{width:100%;border-collapse:collapse;font-size:13.5px}table.adm td,table.adm th{border-bottom:1px solid var(--line);padding:5px 4px;text-align:left}
+.inner{margin-top:12px;border:1px solid var(--line);border-radius:10px}
+.req{color:var(--bad);font-size:12px;margin-left:4px}
+</style></head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="school"><svg class="emblem" viewBox="0 0 1205 1205" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g transform="translate(-2200 -896)"><path d="M2200 1498.5C2200 1165.75 2469.75 896 2802.5 896 3135.25 896 3405 1165.75 3405 1498.5 3405 1831.25 3135.25 2101 2802.5 2101 2469.75 2101 2200 1831.25 2200 1498.5Z" fill="#EFD311" fill-rule="evenodd"/><path d="M2450.9 1499C2580.99 1499 2698.77 1551.69 2784.03 1636.87L2805.09 1660.02 2826.15 1636.87C2911.41 1551.69 3029.19 1499 3159.28 1499 3240.59 1499 3317.09 1519.58 3383.84 1555.81L3401 1566.23 3392.77 1620.14C3336.56 1894.57 3093.54 2101 2802.26 2101 2510.98 2101 2267.96 1894.57 2211.75 1620.14L2204 1569.37 2226.34 1555.81C2293.09 1519.58 2369.59 1499 2450.9 1499Z" fill="#3752A4" fill-rule="evenodd"/><path d="M2929.77 1204.2 2929.77 1245.08 3047.1 1245.08 3047.1 1204.2ZM2929.77 1134.48 2929.77 1175.36 3047.1 1175.36 3047.1 1134.48ZM2578.45 1071 2617.35 1071 2617.35 1105.65 2696.39 1105.65 2735.29 1105.65 2736.38 1105.65 2736.38 1134.48 2735.29 1134.48 2735.29 1307.49C2735.29 1339.34 2770.12 1365.16 2813.08 1365.16 2856.04 1365.16 2890.87 1339.34 2890.87 1307.49L2890.87 1105.65 2891.52 1105.65 2929.77 1105.65 3047.1 1105.65 3086 1105.65 3086 1134.48 3086 1175.36 3086 1204.2 3086 1245.08 3086 1273.91 3086 1394 3047.1 1394 3047.1 1273.91 2929.77 1273.91 2929.77 1307.49C2929.77 1355.27 2877.53 1394 2813.08 1394 2748.64 1394 2696.39 1355.27 2696.39 1307.49L2696.39 1134.48 2617.35 1134.48 2617.35 1290.49C2617.35 1335.95 2577.35 1373.88 2524.18 1382.65L2503.53 1384.33 2503.53 1352.97 2516.34 1351.93C2551.79 1346.08 2578.45 1320.8 2578.45 1290.49L2578.45 1134.48 2503 1134.48 2503 1105.65 2578.45 1105.65Z" fill="#FFFFFF" fill-rule="evenodd"/><path d="M2827.57 1745.18 2827.57 1936.01 2843.55 1934.44C2931.52 1917.9 3000.95 1849.25 3018.71 1761.93L3020.38 1745.18ZM2584.69 1745.18 2587.27 1766.44C2606.85 1853.37 2677.7 1920.55 2766 1935.25L2783.88 1936.63 2783.88 1745.18ZM3143.05 1487.09C3204.17 1485.91 3266.09 1496.32 3325.54 1519.15 3349.31 1528.28 3372.05 1539.15 3393.64 1551.59L3402 1557.31 3401.84 1560.44 3395.88 1599.45 3374.45 1584.8C3354.59 1573.36 3333.65 1563.35 3311.77 1554.94 3158.55 1496.1 2987.42 1526.89 2864.97 1630.6L2827.57 1667.66 2827.57 1701.52 3099.06 1701.52 3099.06 1745.18 3060.91 1745.18 3058.42 1770.03C3037.4 1873.39 2955.22 1954.65 2851.09 1974.23L2827.57 1976.54 2827.57 2099.73 2802.32 2101 2783.88 2100.07 2783.88 1977.08 2759.29 1975.19C2654.77 1957.79 2570.91 1878.27 2547.73 1775.37L2544.07 1745.18 2505.94 1745.18 2505.94 1701.52 2783.88 1701.52 2783.88 1667.88 2749.45 1633.13C2627.44 1527.94 2455.75 1495.83 2301.64 1554.2 2279.62 1562.53 2258.56 1572.49 2238.57 1583.9L2209.4 1603.68 2203 1561.81 2219.52 1550.61C2241.24 1538.21 2264.12 1527.4 2288.03 1518.34 2455.45 1454.94 2641.97 1489.82 2774.51 1604.09L2805.21 1635.07 2822.67 1616.9C2910.78 1534.61 3025.41 1489.37 3143.05 1487.09Z" fill="#FFFFFF" fill-rule="evenodd"/></g></svg><span>구월중학교 다면평가관리위원회</span></div>
+    <nav class="tabs"><a href="vote.html">다면평가자 추천 투표</a><a class="on" href="jr.html">정량평가·자기실적평가서</a></nav>
+    <h1 id="title">정량평가·자기실적평가서 입력</h1>
+    <div class="meta"><span id="badge" class="badge b-wait">불러오는 중</span><span id="period"></span></div>
+  </header>
+
+  <section id="login" class="card vcard">
+    <h2>나이스 개인번호를 넣고 시작해 주세요</h2>
+    <form id="fLogin" autocomplete="off">
+      <label class="f" for="nid">나이스 개인번호</label>
+      <div class="nidbox"><span class="pre">E</span><input type="text" id="nid" maxlength="9" inputmode="numeric" pattern="[0-9]*" placeholder="E 뒤 숫자 9자리" autocomplete="off"></div>
+      <div class="hint">이 화면의 내용은 선생님 이름과 함께 저장되며, 다면평가자 추천 투표(무기명)와는 따로 보관됩니다.</div>
+      <button class="btn big" id="bLogin" type="submit">시작</button>
+    </form>
+    <div id="mLogin"></div>
+    <details class="more inner"><summary>📋 이 화면에서 하는 일 <span class="tap"></span></summary><div class="more-body">
+      <p>① 나이스 시간표·연수 이력, 업무분장, 내부기안 자료로 <b>미리 채운 점수</b>를 확인합니다.</p>
+      <p>② 틀린 곳은 고치고 사유를 적고, 위원회 활동·나이스에 없는 연수 등은 직접 입력합니다. 증빙 파일도 올릴 수 있어요.</p>
+      <p>③ 자기실적평가서를 작성하고 <b>제출</b>한 뒤, 정량평가표(엑셀)·자기실적평가서(한글)를 내려받아 출력·서명하여 교무기획부에 냅니다.</p>
+      <p>임시 저장하면 다음에 이어서 쓸 수 있어요. 마감 전까지는 제출 뒤에도 고칠 수 있습니다.</p>
+    </div></details>
+  </section>
+
+  <section id="main" class="hidden">
+    <div class="card who">
+      <div class="whorow"><div><b id="wName"></b> <span id="wType" class="chip"></span></div><span id="wStatus" class="badge"></span></div>
+      <div class="hint" id="wSaved"></div>
+      <div class="sumgrid" id="sumgrid"></div>
+    </div>
+    <div id="areas"></div>
+    <div class="card" id="srCard"></div>
+    <div class="card" id="fileCard"></div>
+    <div class="card actions">
+      <div id="mSave"></div>
+      <div class="row2"><button class="btn ghost" id="bSave" type="button">임시 저장</button><button class="btn" id="bSubmit" type="button">제출</button></div>
+      <div class="row2"><button class="btn ghost" id="bXlsx" type="button">정량평가표 받기(엑셀)</button><button class="btn ghost" id="bHwpx" type="button">자기실적평가서 받기(한글)</button></div>
+      <p class="hint">내려받은 두 파일을 출력해 서명한 뒤 <b>12. 4.(금)까지</b> 교무기획부에 내 주세요. 공문(내부기안)으로 확인하는 항목은 문서번호만 적으면 되고, 나이스 연수 이력은 교무기획부가 확인합니다.</p>
+    </div>
+  </section>
+
+  <section id="admin" class="hidden">
+    <div class="card" id="admLogin"><h2>관리자 — 제출 현황</h2>
+      <form id="fAdmin"><label class="f" for="apw">비밀번호</label><input type="password" id="apw"><button class="btn" type="submit">보기</button></form><div id="mAdmin"></div></div>
+    <div id="admView" class="hidden"></div>
+  </section>
+  <footer><a href="?admin" id="admLink">관리자</a></footer>
+</div>
+
+<script>
+'use strict';
+// 정량평가·자기실적평가서 입력 화면 (2026-11-26). 서버 = 투표와 같은 Apps Script. 개인 자료는 서버에서만 받는다.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxkwzKGcq4EG9DIWqHJKlNrIZ-0qFWrDJLqGnWLlj8fRYoF7NG2toC0TStH-qcWJjPihA/exec';
+const API = new URLSearchParams(location.search).get('api') || API_URL;
+const isAdmin = new URLSearchParams(location.search).has('admin');
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const show = (id, on = true) => $(id).classList.toggle('hidden', !on);
+const r2 = (x) => Math.round(x * 100) / 100;
+const msg = (id, t, k = 'err') => { $(id).innerHTML = t ? `<div class="msg ${k}">${esc(t)}</div>` : ''; };
+const ERR = { nid: 'E 뒤 숫자 9자리를 넣어 주세요.', nomatch: '등록된 개인번호가 아니에요. 다시 확인해 주세요.', noright: '이 화면을 쓸 수 있는 명단에 없어요. 교무기획부에 문의해 주세요.', locked: '잘못된 시도가 많아 잠시 막혔어요. 10분 뒤 다시 해 주세요.',
+  token: '다시 로그인해 주세요.', expired: '로그인한 지 1시간이 지났어요. 개인번호를 다시 넣어 주세요(입력한 내용은 그대로 있어요).', ended: '제출 마감이 지났어요.', busy: '잠시 뒤 다시 눌러 주세요.', toolong: '글이 너무 길어요. 조금 줄여 주세요.',
+  toobig: '파일이 너무 커요(10MB 이하).', drive: '파일 저장소 준비가 아직 안 됐어요. 파일은 출력해서 함께 내 주세요.', server: '서버 오류예요. 잠시 뒤 다시 해 주세요.', network: '연결이 잘 안 돼요. 새로 고침 후 다시 해 주세요.', pw: '비밀번호가 달라요.' };
+const errText = (e) => ERR[e] || ERR.server;
+async function call(action, data = {}) {
+  try {
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...data }), redirect: 'follow' });
+    return await res.json();
+  } catch (e) { return { ok: false, error: 'network' }; }
+}
+const fmt = (t) => { if (!t) return ''; const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+
+let TOKEN = '', ST = null, DIRTY = false;
+const BR = [[22, 28.5, 8], [21, 28, 9], [20, 27.5, 10], [19, 27, 11], [18, 26.5, 12], [17, 26, 13]];
+const bracket = (h) => { for (const [lim, sc, row] of BR) if (h >= lim) return { sc, row }; return { sc: 25.5, row: 14 }; };
+const AREA = [
+  { key: 'L', title: '학습지도', base: 0, max: 30, items: ['L1', 'L8', 'L9', 'L10'] },
+  { key: 'G', title: '생활지도', base: 23, max: 30, items: ['G2', 'G3'] },
+  { key: 'P', title: '전문성 개발', base: 6, max: 10, items: ['P2'] },
+  { key: 'W', title: '담당업무', base: 25.05, max: 30, items: ['W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'] }
+];
+const TITLE = { L1: '1~7. 주당 수업시수', L8: '8. 다학년/다교과/순회', L9: '9. 수업 공개(전문적학습공동체)', L10: '10. 창체동아리 지도교사', G2: '2. 근무월수 × 0.5 (상한 6)', G3: '3. 안전생활부장·학교폭력 담당·학년부장',
+  P2: '2. 직무연수 시간 × 0.1 (상한 4)', W2: '2. 담임교사 월수 × 0.2 (상한 2.4)', W3: '3. 보직교사 월수 × 0.2 (상한 2.4)', W4: '4. 보건·상담교사 월수 × 0.2 (상한 2.4)', W5: '5. 업무곤란도1(교무기획부장·연구혁신부장)',
+  W6: '6. 업무곤란도2(투표 다득표 7개)', W7: '7. 교과부장', W8: '8. 공동체 운영(상조회 임원)', W9: '9. 위원회 활동(각 0.1, 상한 0.3)', W10: '10. 기타 — 자율동아리 / 공모(목적)사업 담당자 (상한 0.25)' };
+const SIMPLE = ['L8', 'L10', 'G2', 'G3', 'W2', 'W3', 'W4', 'W5', 'W7', 'W8'];
+
+function newData() { return { ov: {}, L1: {}, L9: { on: false, date: '', doc: '' }, W9: { rows: [] }, W10: { jaul: { on: false, doc: '' }, gm: { on: false, doc: '', memo: '' } }, extra: [], files: [] }; }
+function B(id) { return ST.base.items[id]; }
+
+// ---------- 점수 ----------
+function l1() {
+  let t = 0; const rows = {};
+  for (const s of B('L1').sems) {
+    const ov = ST.data.L1['h' + s.sem];
+    const h = ov !== undefined && ov !== '' ? Number(ov) : (s.need ? null : s.hours);
+    if (h == null || isNaN(h)) continue;
+    const { sc, row } = bracket(h); const v = sc * s.months / 12;
+    t += v; rows[row] = (rows[row] || 0) + v;
+  }
+  return { total: r2(t), rows };
+}
+function workAuto() {
+  const b = B('W6');
+  if (b.excluded) return { score: 0, note: b.basis };
+  if (!ST.work || !ST.work.done) return { score: 0, note: `${b.basis.split(' — ')[0]} — 투표 마감(12/1 16:30) 뒤 결과가 자동 반영돼요.` };
+  const hit = ST.work.labels.includes(b.label);
+  return { score: hit ? 0.5 : 0, note: hit ? `투표 결과 7개에 '${b.label}' 포함` : `투표 결과 7개에 내 업무(${b.label || '없음'})가 없어요` };
+}
+function itemScore(id) {
+  const d = ST.data;
+  if (id === 'L1') return l1().total;
+  if (id === 'L9') return d.L9.on ? 0.5 : 0;
+  if (id === 'P2') return r2(Math.min(4, (B('P2').hours + d.extra.reduce((a, x) => a + (Number(x.hours) || 0), 0)) * 0.1));
+  if (id === 'W6') { const o = d.ov.W6; return o && o.on ? Number(o.score) || 0 : workAuto().score; }
+  if (id === 'W9') return r2(Math.min(0.3, d.W9.rows.filter((x) => x.on && Number(x.count) >= 3).length * 0.1));
+  if (id === 'W10') return (d.W10.jaul.on && d.W10.jaul.doc) || (d.W10.gm.on && d.W10.gm.doc) ? 0.25 : 0;
+  const o = d.ov[id]; return o && o.on ? Number(o.score) || 0 : B(id).score;
+}
+function areaScore(a) { return r2(a.base + a.items.reduce((s, id) => s + itemScore(id), 0)); }
+function total() { return r2(AREA.reduce((s, a) => s + areaScore(a), 0)); }
+function edits() {
+  const d = ST.data; let n = Object.values(d.ov).filter((o) => o.on).length;
+  n += Object.keys(d.L1).filter((k) => k.startsWith('h') && d.L1[k] !== '' && d.L1[k] !== undefined).length;
+  return n + d.extra.length;
+}
+
+// ---------- 그리기 ----------
+function render() {
+  const b = ST.base;
+  $('wName').textContent = ST.name + ' 선생님'; $('wType').textContent = ST.type;
+  const stc = { '제출': 'b-open', '제출(수정 중)': 'b-wait', '임시 저장': 'b-wait' }[ST.status] || 'b-off';
+  $('wStatus').textContent = ST.status || '아직 저장 안 함'; $('wStatus').className = 'badge ' + stc;
+  $('wSaved').textContent = [ST.savedAt ? `마지막 저장 ${ST.savedAt}` : '', ST.submittedAt ? `제출 ${ST.submittedAt}` : '', `평가 기간 ${b.period[0]} ~ ${b.period[1]}`].filter(Boolean).join(' · ');
+  $('areas').innerHTML = AREA.map((a) => `<div class="card area"><h2>${a.title} <span class="asc" id="as_${a.key}"></span></h2>`
+    + (a.base ? `<div class="it fixed"><div class="ih"><span>1. 기본점</span><b>${a.base}</b></div></div>` : '')
+    + a.items.map(itemHtml).join('') + '</div>').join('');
+  renderSR(); renderFiles(); bind(); recalc();
+}
+function autoBadge(id) { return `<b class="sc" id="sc_${id}"></b>`; }
+function ovHtml(id, unit = '점') {
+  const o = ST.data.ov[id] || {};
+  return `<div class="ovbox${o.on ? '' : ' hidden'}" id="ov_${id}"><label class="f">고친 점수(${unit})</label><input type="number" step="0.01" min="0" data-ov="${id}" data-k="score" value="${esc(o.score ?? '')}">
+    <label class="f">고친 사유·근거</label><textarea rows="2" data-ov="${id}" data-k="reason" placeholder="예: 3월 담임 교체로 11개월">${esc(o.reason || '')}</textarea></div>`;
+}
+function itemHtml(id) {
+  const b = B(id), d = ST.data;
+  const head = `<div class="ih"><span>${TITLE[id]}</span>${autoBadge(id)}</div>`;
+  if (id === 'L1') {
+    const rows = b.sems.map((s) => {
+      const v = d.L1['h' + s.sem];
+      return `<div class="semrow"><span>${s.sem}학기 (${s.months}개월)</span><input type="number" step="0.5" min="0" data-l1="h${s.sem}" value="${esc(v ?? '')}" placeholder="${s.need ? '입력 필요' : s.hours}"><span class="unit">시간</span><small>${s.need ? '나이스 시간표에 없음 — 실제 주당 시수를 넣어 주세요' : esc(s.note || '나이스 시간표 ' + s.hours + '시간')}</small></div>`;
+    }).join('');
+    return `<div class="it">${head}<p class="basis">${esc(b.basis)}. 다르면 숫자를 고치고 사유를 적어 주세요.</p>${b.warn ? `<div class="warnbox">${esc(b.warn)}</div>` : ''}${rows}
+      <textarea rows="2" data-l1="reason" placeholder="시수를 고쳤다면 사유(예: 1학기 4월부터 2시간 추가 담당)">${esc(d.L1.reason || '')}</textarea></div>`;
+  }
+  if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p><label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>
+      <div class="grid2"><input type="text" data-in="L9.date" placeholder="날짜 예: 6/12" value="${esc(d.L9.date)}"><input type="text" data-in="L9.doc" placeholder="문서번호 예: 구월중학교-12345" value="${esc(d.L9.doc)}"></div></div>`;
+  if (id === 'P2') {
+    const list = b.list.map((t) => `<li>${esc(t.name)} <small>${esc(t.org)} · ${esc(t.end)} · ${t.hours}시간</small></li>`).join('') || '<li class="hint">나이스에 2026. 1. 1. 이후 끝난 직무연수가 없어요</li>';
+    const ex = d.extra.map((x, i) => `<div class="exrow"><input type="text" data-ex="${i}" data-k="name" placeholder="연수명" value="${esc(x.name)}"><input type="text" data-ex="${i}" data-k="org" placeholder="연수기관" value="${esc(x.org)}">
+      <input type="text" data-ex="${i}" data-k="end" placeholder="이수일 예: 11/20" value="${esc(x.end)}"><input type="number" step="0.5" min="0" data-ex="${i}" data-k="hours" placeholder="시간" value="${esc(x.hours)}"><button type="button" class="mini" data-exdel="${i}">삭제</button></div>`).join('');
+    return `<div class="it">${head}<p class="basis">${esc(b.basis)}. 40시간이면 만점(4점)이에요. <b>수강 중인 연수는 11. 30.(월)까지 이수를 마쳐 주세요.</b></p><ul class="tl">${list}</ul>
+      <div class="sub">나이스에 없는 연수(아직 안 올라간 연수 포함) — 이수증은 아래 「증빙 파일」에 올려 주세요</div>${ex}<button type="button" class="mini add" id="exAdd">+ 연수 추가</button></div>`;
+  }
+  if (id === 'W6') { const o = d.ov.W6 || {}; return `<div class="it">${head}<p class="basis" id="w6note"></p>${B('W6').excluded ? '' : `<button type="button" class="mini" data-ovt="W6">${o.on ? '자동 값으로 되돌리기' : '고치기'}</button>${ovHtml('W6')}`}</div>`; }
+  if (id === 'W9') {
+    const mine = b.comm.map((c) => c.name);
+    if (!d.W9.rows.length) d.W9.rows = b.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
+    const rows = d.W9.rows.map((x, i) => `<div class="cmrow"><label class="chk"><input type="checkbox" data-cm="${i}" data-k="on" ${x.on ? 'checked' : ''}> <b>${esc(x.name)}</b> ${x.as ? `<small>명단상: ${esc(x.as)}</small>` : '<small>직접 추가</small>'}</label>
+      <div class="grid2"><input type="number" min="0" data-cm="${i}" data-k="count" placeholder="참석 횟수" value="${esc(x.count)}"><input type="text" data-cm="${i}" data-k="doc" placeholder="근거(회의록 문서번호 등)" value="${esc(x.doc)}"></div></div>`).join('');
+    const others = ST.meta.comm.filter((c) => !d.W9.rows.some((x) => x.name === c));
+    return `<div class="it">${head}<p class="basis">2026 각종위원회 명단에서 선생님 직위·업무로 찾은 위원회예요. <b>3회 이상 활동한 위원회</b>만 체크하고 참석 횟수와 근거를 적어 주세요. 교무기획부가 내부기안으로 다시 확인합니다.</p>${rows || '<p class="hint">명단에서 찾은 위원회가 없어요. 아래에서 추가해 주세요.</p>'}
+      <div class="grid2"><select id="cmAdd"><option value="">+ 위원회 추가(학운위 교원위원·인사자문 대표 등)</option>${others.map((c) => `<option>${esc(c)}</option>`).join('')}<option value="__">직접 입력</option></select><span></span></div></div>`;
+  }
+  if (id === 'W10') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>
+      <label class="chk"><input type="checkbox" data-in="W10.jaul.on" ${d.W10.jaul.on ? 'checked' : ''}> 자율동아리 운영(축제 부스, 지도 5회 이상, 운영결과 내부기안)</label><input type="text" data-in="W10.jaul.doc" placeholder="운영결과 내부기안 문서번호" value="${esc(d.W10.jaul.doc)}">
+      <label class="chk"><input type="checkbox" data-in="W10.gm.on" ${d.W10.gm.on ? 'checked' : ''}> 공모(목적)사업 담당자</label><div class="grid2"><input type="text" data-in="W10.gm.memo" placeholder="사업명" value="${esc(d.W10.gm.memo)}"><input type="text" data-in="W10.gm.doc" placeholder="신청·선정 공문 문서번호" value="${esc(d.W10.gm.doc)}"></div></div>`;
+  const o = d.ov[id] || {};
+  return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p><button type="button" class="mini" data-ovt="${id}">${o.on ? '자동 값으로 되돌리기' : '고치기'}</button>${ovHtml(id)}</div>`;
+}
+const SRF = [['grade', '담당 학년 및 학급'], ['subj', '담당 과목'], ['hr', '담임 여부'], ['duty', '담당 업무'], ['head', '보직교사 여부'], ['hours', '주당 수업시간 수'], ['open', '연간 수업공개 실적'], ['stu', '연간 학생 상담 실적'], ['par', '연간 학부모 상담 실적'], ['etc', '그 밖의 실적사항']];
+const SRT = [['g1', '학습지도 추진 목표', '학년 초에 계획했던 학습지도 목표'], ['r1', '학습지도 추진 실적', '목표와 대비한 추진 실적을 구체적으로'], ['g2', '생활지도 추진 목표', ''], ['r2', '생활지도 추진 실적', ''], ['g3', '전문성개발 추진 목표', ''], ['r3', '전문성개발 추진 실적', ''], ['g4', '담당 업무 추진 목표', ''], ['r4', '담당 업무 추진 실적', ''], ['cr', '창의적 업무개선 사항', '']];
+const SRE = [['e1', '목표달성도'], ['e2', '창의성'], ['e3', '적시성'], ['e4', '노력도']];
+function renderSR() {
+  const s = ST.sr;
+  $('srCard').innerHTML = `<h2>자기실적평가서</h2><p class="basis">기초 자료는 미리 채웠어요. 다르면 고쳐 주세요. 줄을 바꾸면 한글 파일에서도 줄이 바뀝니다.</p>
+    <div class="srgrid">${SRF.map(([k, t]) => `<label class="f">${t}</label><input type="text" data-sr="${k}" value="${esc(s[k] || '')}">`).join('')}</div>
+    ${SRT.map(([k, t, ph]) => `<label class="f">${t}${k === 'cr' ? '' : ' <span class="req">필수</span>'}</label><textarea rows="${k.startsWith('r') ? 5 : 3}" data-sr="${k}" placeholder="${esc(ph)}">${esc(s[k] || '')}</textarea>`).join('')}
+    <h3>자기 평가 종합</h3>${SRE.map(([k, t]) => `<div class="evrow"><span>${t}</span>${['만족', '보통', '미흡'].map((v) => `<label class="pill"><input type="radio" name="${k}" data-sr="${k}" value="${v}" ${s[k] === v ? 'checked' : ''}> ${v}</label>`).join('')}</div>`).join('')}`;
+}
+function renderFiles() {
+  const f = ST.data.files;
+  $('fileCard').innerHTML = `<h2>증빙 파일 <small class="hint">선택</small></h2><p class="basis">나이스에 없는 연수 이수증, 고친 점수의 근거 등. 파일 하나 10MB 이하. 공문으로 확인되는 항목은 문서번호만 적으면 돼요.</p>
+    <ul class="tl">${f.map((x, i) => `<li>${esc(x.name)} <small>${Math.round(x.size / 1024)}KB ${x.memo ? '· ' + esc(x.memo) : ''}</small> <button type="button" class="mini" data-fdel="${i}">목록에서 빼기</button></li>`).join('') || '<li class="hint">올린 파일 없음</li>'}</ul>
+    <div class="grid2"><input type="text" id="fMemo" placeholder="무엇의 근거인지 예: ○○연수 이수증"><input type="file" id="fInput"></div><button type="button" class="btn ghost" id="fUp">올리기</button><div id="mFile"></div>`;
+}
+function recalc() {
+  for (const a of AREA) {
+    for (const id of a.items) { const el = $('sc_' + id); if (el) { const v = itemScore(id); el.textContent = v ? `+${v}` : '0'; el.className = 'sc' + (v ? ' pos' : ''); } }
+    $('as_' + a.key).textContent = `${areaScore(a)} / ${a.max}`;
+  }
+  const w = $('w6note'); if (w) w.textContent = workAuto().note;
+  $('sumgrid').innerHTML = AREA.map((a) => `<div><small>${a.title}</small><b>${areaScore(a)}</b></div>`).join('') + `<div class="tot"><small>총점</small><b>${total()}</b></div>`;
+}
+function setPath(obj, path, val) { const p = path.split('.'); let o = obj; for (let i = 0; i < p.length - 1; i++) o = o[p[i]]; o[p[p.length - 1]] = val; }
+function touch() { DIRTY = true; recalc(); }
+function bind() {
+  const root = $('main');
+  root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); });
+  root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); touch(); });
+  root.querySelectorAll('[data-ov]').forEach((el) => el.oninput = () => { const o = ST.data.ov[el.dataset.ov] = ST.data.ov[el.dataset.ov] || { on: true }; o[el.dataset.k] = el.value; touch(); });
+  root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && (o.score === undefined || o.score === '')) o.score = itemScore(id) || B(id).score || 0; render(); DIRTY = true; });
+  root.querySelectorAll('[data-cm]').forEach((el) => el.oninput = el.onchange = () => { const x = ST.data.W9.rows[+el.dataset.cm]; x[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; touch(); });
+  const ca = $('cmAdd'); if (ca) ca.onchange = () => { let v = ca.value; if (!v) return; if (v === '__') v = (prompt('위원회 이름') || '').trim(); if (v) ST.data.W9.rows.push({ name: v, as: '', on: true, count: '', doc: '' }); render(); DIRTY = true; };
+  root.querySelectorAll('[data-ex]').forEach((el) => el.oninput = () => { ST.data.extra[+el.dataset.ex][el.dataset.k] = el.value; touch(); });
+  root.querySelectorAll('[data-exdel]').forEach((el) => el.onclick = () => { ST.data.extra.splice(+el.dataset.exdel, 1); render(); DIRTY = true; });
+  const ea = $('exAdd'); if (ea) ea.onclick = () => { ST.data.extra.push({ name: '', org: '', end: '', hours: '' }); render(); DIRTY = true; };
+  root.querySelectorAll('[data-sr]').forEach((el) => el.oninput = el.onchange = () => { if (el.type === 'radio' && !el.checked) return; ST.sr[el.dataset.sr] = el.value; DIRTY = true; });
+  root.querySelectorAll('[data-fdel]').forEach((el) => el.onclick = () => { ST.data.files.splice(+el.dataset.fdel, 1); renderFiles(); bind(); DIRTY = true; });
+  const fu = $('fUp'); if (fu) fu.onclick = upload;
+}
+
+// ---------- 서버 ----------
+async function login(nid) {
+  const r = await call('jlogin', { nid });
+  if (!r.ok) return r;
+  TOKEN = r.result.token;
+  if (ST) return { ok: true, result: { again: true } };
+  const l = await call('jload', { token: TOKEN });
+  if (!l.ok) return l;
+  const x = l.result;
+  if (!x.base) return { ok: false, error: 'nobase' };
+  ST = { name: x.name, type: x.type, base: x.base, meta: x.meta || {}, work: x.work, status: x.status, savedAt: x.savedAt, submittedAt: x.submittedAt, deadline: x.deadline,
+    data: Object.assign(newData(), x.data || {}), sr: x.sr || Object.assign({}, x.base.sr, { open: '', stu: '', par: '', etc: '' }) };
+  return { ok: true, result: {} };
+}
+function validate(submit) {
+  const d = ST.data, s = ST.sr, bad = [];
+  B('L1').sems.forEach((x) => { const v = d.L1['h' + x.sem]; if (x.need && (v === undefined || v === '')) bad.push(`${x.sem}학기 주당 수업시수`); });
+  const l1changed = Object.keys(d.L1).some((k) => k.startsWith('h') && d.L1[k] !== '' && d.L1[k] !== undefined && !B('L1').sems.find((x) => 'h' + x.sem === k && x.need));
+  if (l1changed && !(d.L1.reason || '').trim()) bad.push('수업시수를 고친 사유');
+  Object.entries(d.ov).forEach(([id, o]) => { if (o.on && !(o.reason || '').trim()) bad.push(`${TITLE[id]} — 고친 사유`); });
+  if (d.L9.on && !d.L9.doc && !d.L9.date) bad.push('수업 공개 날짜 또는 문서번호');
+  d.W9.rows.forEach((x) => { if (x.on && (!(Number(x.count) >= 3) || !x.doc)) bad.push(`${x.name} — 3회 이상 횟수와 근거`); });
+  if (d.W10.jaul.on && !d.W10.jaul.doc) bad.push('자율동아리 운영결과 문서번호');
+  if (d.W10.gm.on && !d.W10.gm.doc) bad.push('공모사업 문서번호');
+  d.extra.forEach((x, i) => { if (!x.name || !(Number(x.hours) > 0)) bad.push(`추가 연수 ${i + 1} — 연수명·시간`); });
+  if (submit) {
+    SRT.forEach(([k, t]) => { if (k !== 'cr' && !(s[k] || '').trim()) bad.push(`자기실적평가서 — ${t}`); });
+    SRE.forEach(([k, t]) => { if (!s[k]) bad.push(`자기 평가 — ${t}`); });
+  }
+  return bad;
+}
+async function save(submit) {
+  msg('mSave', '');
+  const bad = validate(submit);
+  if (bad.length && submit) return msg('mSave', '아래 칸을 채워 주세요: ' + bad.slice(0, 8).join(' · ') + (bad.length > 8 ? ` 외 ${bad.length - 8}개` : ''));
+  const b1 = $('bSave'), b2 = $('bSubmit'); b1.disabled = b2.disabled = true;
+  const r = await call('jsave', { token: TOKEN, data: ST.data, sr: ST.sr, total: total(), edits: edits(), submit });
+  b1.disabled = b2.disabled = false;
+  if (!r.ok) { if (['token', 'expired'].includes(r.error)) { relogin(); } return msg('mSave', errText(r.error)); }
+  Object.assign(ST, { status: r.result.status, savedAt: r.result.savedAt, submittedAt: r.result.submittedAt }); DIRTY = false;
+  render();
+  msg('mSave', submit ? '제출했어요. 아래 단추로 두 파일을 받아 출력·서명해 주세요.' : '임시 저장했어요.' + (bad.length ? ` (제출 전에 채울 칸 ${bad.length}개)` : ''), 'ok');
+}
+function relogin() { show('login'); msg('mLogin', ERR.expired, 'info'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+async function upload() {
+  const inp = $('fInput'), f = inp.files[0]; if (!f) return msg('mFile', '파일을 골라 주세요.');
+  if (f.size > 10 * 1024 * 1024) return msg('mFile', ERR.toobig);
+  msg('mFile', '올리는 중…', 'info');
+  const b64 = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(f); });
+  const r = await call('jupload', { token: TOKEN, filename: f.name, mime: f.type, b64 });
+  if (!r.ok) { if (['token', 'expired'].includes(r.error)) relogin(); return msg('mFile', errText(r.error)); }
+  ST.data.files.push({ id: r.result.id, name: r.result.name, size: r.result.size, memo: $('fMemo').value.trim() });
+  renderFiles(); bind(); DIRTY = true; await save(false); msg('mFile', '올렸어요.', 'ok');
+}
+
+// ---------- 파일 만들기 ----------
+const NS_X = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+const NS_H = 'http://www.hancom.co.kr/hwpml/2011/paragraph';
+const XMLDECL = '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>';
+function ser(doc) { let s = new XMLSerializer().serializeToString(doc); if (!s.startsWith('<?xml')) s = XMLDECL + s; return s; }
+function colNum(ref) { const m = ref.match(/^([A-Z]+)/)[1]; let n = 0; for (const ch of m) n = n * 26 + ch.charCodeAt(0) - 64; return n; }
+function setCell(doc, ref, val) {
+  const rn = +ref.match(/\d+$/)[0], sd = doc.getElementsByTagNameNS(NS_X, 'sheetData')[0];
+  let row = [...sd.getElementsByTagNameNS(NS_X, 'row')].find((r) => +r.getAttribute('r') === rn);
+  if (!row) { row = doc.createElementNS(NS_X, 'row'); row.setAttribute('r', rn); sd.appendChild(row); }
+  let c = [...row.getElementsByTagNameNS(NS_X, 'c')].find((x) => x.getAttribute('r') === ref);
+  if (!c) {
+    c = doc.createElementNS(NS_X, 'c'); c.setAttribute('r', ref);
+    const after = [...row.getElementsByTagNameNS(NS_X, 'c')].find((x) => colNum(x.getAttribute('r')) > colNum(ref));
+    const left = [...row.getElementsByTagNameNS(NS_X, 'c')].filter((x) => colNum(x.getAttribute('r')) < colNum(ref)).pop();
+    if (left && left.getAttribute('s')) c.setAttribute('s', left.getAttribute('s'));
+    row.insertBefore(c, after || null);
+  }
+  while (c.firstChild) c.removeChild(c.firstChild);
+  if (typeof val === 'number') { c.removeAttribute('t'); const v = doc.createElementNS(NS_X, 'v'); v.textContent = String(val); c.appendChild(v); }
+  else { c.setAttribute('t', 'inlineStr'); const is = doc.createElementNS(NS_X, 'is'), t = doc.createElementNS(NS_X, 't'); t.textContent = val; is.appendChild(t); c.appendChild(is); }
+}
+async function tpl(name) { const r = await fetch('jr/tpl/' + encodeURIComponent(name) + '?v=2'); if (!r.ok) throw new Error('tpl'); return JSZip.loadAsync(await r.arrayBuffer()); }
+function dl(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+async function makeXlsx() {
+  const z = await tpl('정량평가표_양식.xlsx');
+  const p = 'xl/worksheets/sheet1.xml', doc = new DOMParser().parseFromString(await z.file(p).async('string'), 'application/xml');
+  const put = (row, score) => { if (score) { setCell(doc, 'G' + row, 1); setCell(doc, 'H' + row, r2(score)); } };
+  setCell(doc, 'G4', `교사 : ${ST.name}  (인)`);
+  const L = l1(); Object.entries(L.rows).forEach(([row, v]) => put(+row, v));
+  put(15, itemScore('L8')); put(16, itemScore('L9')); put(17, itemScore('L10'));
+  put(19, 23); put(20, itemScore('G2')); put(21, itemScore('G3'));
+  put(24, 6); put(25, itemScore('P2'));
+  put(27, 25.05); ['W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'].forEach((id, i) => put(28 + i, itemScore(id)));
+  z.file(p, ser(doc));
+  const wp = 'xl/workbook.xml'; let wb = await z.file(wp).async('string');
+  wb = /<calcPr[^>]*fullCalcOnLoad/.test(wb) ? wb : wb.replace(/<calcPr([^>]*)\/>/, '<calcPr$1 fullCalcOnLoad="1"/>');
+  z.file(wp, wb); if (z.file('xl/calcChain.xml')) z.remove('xl/calcChain.xml');
+  let ct = await z.file('[Content_Types].xml').async('string'); ct = ct.replace(/<Override[^>]*calcChain[^>]*\/>/, ''); z.file('[Content_Types].xml', ct);
+  const rel = 'xl/_rels/workbook.xml.rels'; let rl = await z.file(rel).async('string'); rl = rl.replace(/<Relationship[^>]*calcChain[^>]*\/>/, ''); z.file(rel, rl);
+  dl(await z.generateAsync({ type: 'blob', compression: 'DEFLATE', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `2026 정량평가표_${ST.name}.xlsx`);
+}
+function pText(p) { let s = ''; for (const r of p.children) if (r.localName === 'run') for (const t of r.children) if (t.localName === 't') s += t.textContent; return s; }
+function lastT(p, doc) {
+  const runs = [...p.children].filter((x) => x.localName === 'run'); let run = runs[runs.length - 1];
+  if (!run) { run = doc.createElementNS(NS_H, 'hp:run'); run.setAttribute('charPrIDRef', '13'); p.insertBefore(run, p.firstChild); }
+  let t = [...run.children].filter((x) => x.localName === 't').pop();
+  if (!t) { t = doc.createElementNS(NS_H, 'hp:t'); run.appendChild(t); }
+  return t;
+}
+function addLinesAfter(doc, p, text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n').map((x) => x.trimEnd()).filter((x, i, a) => x || (i > 0 && i < a.length - 1));
+  const run0 = [...p.children].find((x) => x.localName === 'run'); const cp = run0 ? run0.getAttribute('charPrIDRef') : '13';
+  let at = p;
+  for (const ln of lines) {
+    const np = doc.createElementNS(NS_H, 'hp:p');
+    for (const a of ['id', 'paraPrIDRef', 'styleIDRef', 'pageBreak', 'columnBreak', 'merged']) if (p.hasAttribute(a)) np.setAttribute(a, a === 'pageBreak' ? '0' : p.getAttribute(a));
+    const run = doc.createElementNS(NS_H, 'hp:run'); run.setAttribute('charPrIDRef', cp);
+    const t = doc.createElementNS(NS_H, 'hp:t'); t.textContent = '  ' + ln; run.appendChild(t); np.appendChild(run);
+    at.parentNode.insertBefore(np, at.nextSibling); at = np;
+  }
+}
+const KDATE = (iso) => { const [y, m, d] = iso.split('-').map(Number); return `${y}년 ${m}월 ${d}일`; };
+async function makeHwpx() {
+  const z = await tpl('자기실적평가서_양식.hwpx');
+  const p = 'Contents/section0.xml', doc = new DOMParser().parseFromString(await z.file(p).async('string'), 'application/xml');
+  const s = ST.sr, ps = [...doc.getElementsByTagNameNS(NS_H, 'p')];
+  const after = { '○ 소속': '구월중학교', '○ 직위': '교사', '○ 성명': ST.name };
+  SRF.forEach(([k, t]) => { after['○ ' + t] = s[k] || ''; });
+  const blocks = { '○ 학습지도 추진 목표': 'g1', '○ 학습지도 추진 실적': 'r1', '○ 생활지도 추진 목표': 'g2', '○ 생활지도 추진 실적': 'r2', '○ 전문성개발 추진 목표': 'g3', '○ 전문성개발 추진 실적': 'r3', '○ 담당 업무 추진 목표': 'g4', '○ 담당 업무 추진 실적': 'r4', '○ 창의적 업무개선 사항': 'cr' };
+  let dateP = null;
+  for (const el of ps) {
+    const tx = pText(el).trim();
+    if (tx.startsWith('2. 평가 기간')) { const runs = [...el.children].filter((x) => x.localName === 'run'); const t = lastT(el, doc); t.textContent = `： ${KDATE(ST.base.period[0])}부터 ${KDATE(ST.base.period[1])}까지`; continue; }
+    const fk = Object.keys(after).find((k) => tx === k + '：' || tx === k + ':' || tx === k + ' :');
+    if (fk) { const t = lastT(el, doc); t.textContent = t.textContent + ' ' + after[fk]; continue; }
+    const bk = Object.keys(blocks).find((k) => tx.startsWith(k));
+    if (bk) { addLinesAfter(doc, el, s[blocks[bk]]); continue; }
+    if (/^년\s+월\s+일$/.test(tx)) dateP = el;
+    if (tx.startsWith('작성자(본인) 성명')) { for (const r of el.children) if (r.localName === 'run') for (const t of r.children) if (t.localName === 't' && t.textContent.includes('성명')) { t.textContent = t.textContent.replace(/성명(\s*)/, (m, sp) => '성명  ' + ST.name + ' '.repeat(Math.max(2, sp.length - ST.name.length * 2 - 2))); } }
+  }
+  if (dateP) { const t = lastT(dateP, doc); const d = new Date(); t.textContent = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`; }
+  const marks = [...doc.getElementsByTagNameNS(NS_H, 't')].filter((t) => ['만족', '보통', '미흡'].includes(t.textContent.trim()));
+  SRE.forEach(([k], i) => { const g = marks.slice(i * 3, i * 3 + 3); g.forEach((t) => { if (t.textContent.trim() === s[k]) t.textContent = '●' + s[k]; }); });
+  z.file(p, ser(doc));
+  z.file('mimetype', 'application/hwp+zip', { compression: 'STORE' });
+  dl(await z.generateAsync({ type: 'blob', compression: 'DEFLATE', mimeType: 'application/hwp+zip' }), `2026 자기실적평가서_${ST.name}.hwpx`);
+}
+
+// ---------- 관리자 ----------
+async function loadAdmin(pw) {
+  msg('mAdmin', '불러오는 중…', 'info');
+  const r = await call('jadmin', { pw, detail: false });
+  if (!r.ok) return msg('mAdmin', errText(r.error));
+  show('admLogin', false); show('admView');
+  const L = r.result.list, sub = L.filter((x) => x.status === '제출').length;
+  $('admView').innerHTML = `<div class="card"><h2>제출 ${sub} / ${L.length}명</h2><p class="hint">임시 저장 ${L.filter((x) => x.status && x.status !== '제출').length}명 · 아직 안 들어옴 ${L.filter((x) => !x.status).length}명. 자세한 입력 내용은 시트 「정량 제출」 탭, 첨부는 드라이브 「2026 다면평가 정량평가 증빙」 폴더.</p>
+    <table class="adm"><tr><th>이름</th><th>구분</th><th>상태</th><th>총점</th><th>수정</th><th>저장</th></tr>${L.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${esc(x.status || '-')}</td><td>${x.total ?? ''}</td><td>${x.edits || ''}</td><td>${esc(x.savedAt || '')}</td></tr>`).join('')}</table></div>`;
+}
+
+// ---------- 시작 ----------
+$('nid').addEventListener('input', () => { const v = $('nid').value.replace(/\D/g, '').slice(0, 9); if (v !== $('nid').value) $('nid').value = v; });
+$('fLogin').addEventListener('submit', async (e) => {
+  e.preventDefault(); msg('mLogin', '');
+  const dg = $('nid').value.replace(/\D/g, ''); if (dg.length !== 9) return msg('mLogin', ERR.nid);
+  $('bLogin').disabled = true; $('bLogin').textContent = '불러오는 중…';
+  const r = await login('E' + dg);
+  $('bLogin').disabled = false; $('bLogin').textContent = '시작';
+  if (!r.ok) return msg('mLogin', r.error === 'nobase' ? '선생님 자료가 아직 준비되지 않았어요. 교무기획부에 문의해 주세요.' : errText(r.error));
+  $('nid').value = ''; show('login', false); show('main');
+  if (r.result.again) { msg('mSave', '다시 로그인했어요. 저장을 눌러 주세요.', 'info'); return; }
+  const dlt = ST.deadline ? new Date(ST.deadline) : null;
+  $('badge').textContent = dlt && Date.now() >= dlt ? '마감' : '입력 중'; $('badge').className = 'badge ' + (dlt && Date.now() >= dlt ? 'b-off' : 'b-open');
+  $('period').textContent = dlt ? `마감 ${dlt.getMonth() + 1}/${dlt.getDate()}(금) ${String(dlt.getHours()).padStart(2, '0')}:${String(dlt.getMinutes()).padStart(2, '0')}` : '';
+  render();
+});
+$('bSave').onclick = () => save(false);
+$('bSubmit').onclick = () => save(true);
+$('bXlsx').onclick = async () => { try { msg('mSave', ''); await makeXlsx(); } catch (e) { console.error(e); msg('mSave', '엑셀 파일을 만들지 못했어요. 새로 고침 후 다시 해 주세요.'); } };
+$('bHwpx').onclick = async () => { try { msg('mSave', ''); await makeHwpx(); } catch (e) { console.error(e); msg('mSave', '한글 파일을 만들지 못했어요. 새로 고침 후 다시 해 주세요.'); } };
+window.addEventListener('beforeunload', (e) => { if (DIRTY) { e.preventDefault(); e.returnValue = ''; } });
+setInterval(() => { if (DIRTY && TOKEN && ST && !$('main').classList.contains('hidden')) save(false); }, 120000);
+if (isAdmin) { show('login', false); show('admin'); $('admLink').href = './jr.html'; $('admLink').textContent = '입력 화면'; $('fAdmin').addEventListener('submit', (e) => { e.preventDefault(); loadAdmin($('apw').value); }); $('badge').textContent = '관리자'; }
+else { $('badge').textContent = '로그인'; }
+
+</script>
+</body></html>
