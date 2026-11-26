@@ -231,22 +231,22 @@ const SIMPLE = ['L8', 'L10', 'G2', 'G3', 'W2', 'W3', 'W4', 'W5', 'W7', 'W8'];
 function newData() { return { ov: {}, L1: {}, L9: { on: false, date: '', doc: '' }, W9: { rows: [] }, W10: { jaul: { on: false, doc: '' }, gm: { on: false, doc: '', memo: '' } }, extra: [], files: [] }; }
 function B(id) { return ST.base.items[id]; }
 // 내부기안 근거로 입력 칸 자동 채움 — 한 번만(교사가 고친 값은 덮어쓰지 않음). 근거가 새로 늘면 AUTO_V 를 올림
-const AUTO_V = 1;
 function applyAuto(d) {
-  if ((d.autoV || 0) >= AUTO_V) return d;
+  const AUTO_V = ST.base.autoV || '1';  // 근거 자료(evidence.json)를 새로 만들 때마다 바뀜 → 고치지 않은 칸만 새 근거로 다시 채움
+  if (d.autoV === AUTO_V) return d;
   const b = ST.base.items;
   if (!d.W9.rows.length) d.W9.rows = b.W9.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
   b.W9.comm.forEach((c) => { if (!d.W9.rows.some((x) => x.name === c.name)) d.W9.rows.push({ name: c.name, as: c.as, on: false, count: '', doc: '' }); });
   d.W9.rows.forEach((x) => {
     const c = b.W9.comm.find((y) => y.name === x.name); const f = c && c.found ? c.found : [];
-    if (f.length && !x.touched && (x.auto || (!x.count && !x.doc))) {
+    if (f.length && !x.count && !x.doc && !x.touched) {
       x.count = String(f.length); x.doc = f.map((m) => m.docs.map((n) => '구월중학교-' + n).join('/')).join(', '); x.on = f.length >= 3; x.auto = true;
     }
   });
-  const a9 = b.L9.auto; if (a9 && !d.L9.touched && (d.L9.auto || (!d.L9.on && !d.L9.doc))) { Object.assign(d.L9, a9); d.L9.auto = true; }
+  const a9 = b.L9.auto; if (a9 && !d.L9.on && !d.L9.doc) { Object.assign(d.L9, a9); d.L9.auto = true; }
   const a10 = b.W10.auto || {};
-  if (a10.jaul && !d.W10.jaul.touched && (d.W10.jaul.auto || (!d.W10.jaul.on && !d.W10.jaul.doc))) { Object.assign(d.W10.jaul, a10.jaul); d.W10.jaul.auto = true; }
-  if (a10.gm && !d.W10.gm.touched && (d.W10.gm.auto || (!d.W10.gm.on && !d.W10.gm.doc))) { Object.assign(d.W10.gm, a10.gm); d.W10.gm.auto = true; }
+  if (a10.jaul && !d.W10.jaul.on && !d.W10.jaul.doc) { Object.assign(d.W10.jaul, a10.jaul); d.W10.jaul.auto = true; }
+  if (a10.gm && !d.W10.gm.on && !d.W10.gm.doc) { Object.assign(d.W10.gm, a10.gm); d.W10.gm.auto = true; }
   d.autoV = AUTO_V; return d;
 }
 const AUTOTAG = '<span class="autotag">내부기안으로 자동 채움 — 확인하고 다르면 고쳐 주세요</span>';
@@ -398,7 +398,7 @@ function touch() { DIRTY = true; recalc(); }
 function bind() {
   const root = $('main');
   root.querySelectorAll('[data-l1]').forEach((el) => el.oninput = () => { ST.data.L1[el.dataset.l1] = el.value; touch(); const d = $('l1d'); if (d) d.innerHTML = detailHtml('L1'); });
-  root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); const pp = el.dataset.in.split('.'); pp.pop(); let o = ST.data; pp.forEach((k) => { o = o[k]; }); o.touched = true; touch(); });
+  root.querySelectorAll('[data-in]').forEach((el) => el.oninput = el.onchange = () => { setPath(ST.data, el.dataset.in, el.type === 'checkbox' ? el.checked : el.value); touch(); });
   root.querySelectorAll('[data-ov]').forEach((el) => el.oninput = () => { const o = ST.data.ov[el.dataset.ov] = ST.data.ov[el.dataset.ov] || { on: true }; o[el.dataset.k] = el.value; touch(); });
   root.querySelectorAll('[data-ovt]').forEach((el) => el.onclick = () => { const id = el.dataset.ovt, o = ST.data.ov[id] = ST.data.ov[id] || {}; o.on = !o.on; if (o.on && id !== 'L1' && (o.score === undefined || o.score === '')) { o.on = false; o.score = itemScore(id); o.on = true; } render(); DIRTY = true; });
   root.querySelectorAll('[data-cm]').forEach((el) => el.oninput = el.onchange = () => { const x = ST.data.W9.rows[+el.dataset.cm]; x[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; x.touched = true; touch(); });
