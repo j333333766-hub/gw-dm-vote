@@ -19,6 +19,9 @@ header h1{font-size:21px;margin:4px 0 6px;line-height:1.35;word-break:keep-all}
 .b-open{background:var(--okbg);color:var(--ok)}.b-wait{background:var(--warnbg);color:var(--warn)}.b-off{background:var(--badbg);color:var(--bad)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
 .guide{white-space:pre-line;font-size:14.5px;color:var(--sub)}
+.vcard{border:2px solid var(--brand)}.vcard h2{font-size:18px;margin-bottom:12px;word-break:keep-all}
+.vcard .nidbox .pre{font-size:22px;padding:0 16px}.vcard #nid{font-size:22px;padding:14px 12px;letter-spacing:3px}
+.btn.big{padding:16px;font-size:18px}
 h2{font-size:17px;margin:0 0 12px}
 label.f{display:block;font-weight:600;margin:12px 0 6px;font-size:15px}
 input[type=text],input[type=password],textarea{width:100%;font:inherit;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
@@ -118,7 +121,21 @@ footer a{color:var(--sub)}
 
   <!-- 투표 -->
   <section id="vote" class="hidden">
-    <div class="card guide" id="guide"></div>
+    <div class="card vcard" id="stepVerify">
+      <h2>나이스 개인번호를 넣고 투표를 시작해 주세요</h2>
+      <form id="fVerify" autocomplete="off">
+        <label class="f" for="nid">나이스 개인번호</label>
+        <div class="nidbox"><span class="pre">E</span><input type="text" id="nid" maxlength="9" inputmode="numeric" pattern="[0-9]*" placeholder="E 뒤 숫자 9자리" autocomplete="off"></div>
+        <div class="hint">개인번호는 본인 확인에만 쓰이고, 투표 내용과 함께 저장되지 않아요.</div>
+        <button class="btn big" id="bVerify" type="submit">투표 시작</button>
+      </form>
+      <div id="mVerify"></div>
+    </div>
+
+    <details class="card more" id="guideBox">
+      <summary>📋 다면평가자 구성과 추천 방법 <span class="tap"></span></summary>
+      <div class="more-body guide" id="guide"></div>
+    </details>
 
     <details class="card more" id="useInfo">
       <summary>📌 다면평가 결과는 어디에 쓰이나요? <span class="tap"></span></summary>
@@ -142,17 +159,6 @@ footer a{color:var(--sub)}
         <p class="src">근거: 2026학년도 교사 다면평가 시행 계획(인천광역시교육청), 2026 구월중 다면평가 정량평가 기준(최종)</p>
       </div>
     </details>
-
-    <div class="card" id="stepVerify">
-      <h2>본인 확인</h2>
-      <form id="fVerify" autocomplete="off">
-        <label class="f" for="nid">나이스 개인번호</label>
-        <div class="nidbox"><span class="pre">E</span><input type="text" id="nid" maxlength="9" inputmode="numeric" pattern="[0-9]*" placeholder="E 뒤 숫자 9자리" autocomplete="off"></div>
-        <div class="hint">개인번호는 본인 확인에만 쓰이고, 투표 내용과 함께 저장되지 않아요.</div>
-        <button class="btn" id="bVerify" type="submit">확인</button>
-      </form>
-      <div id="mVerify"></div>
-    </div>
 
     <div class="card hidden" id="stepBallot">
       <form id="fBallot"><div id="qs"></div>
@@ -290,7 +296,7 @@ $('fVerify').addEventListener('submit', async (e) => {
   const nid = 'E' + digits;
   $('bVerify').disabled = true; $('bVerify').textContent = '확인 중…';
   const r = await call('verify', { nid });
-  $('bVerify').disabled = false; $('bVerify').textContent = '확인';
+  $('bVerify').disabled = false; $('bVerify').textContent = '투표 시작';
   if (!r.ok) return msg('mVerify', errText(r.error));
   if (r.result.voted) return msg('mVerify', '이미 투표를 마친 번호예요. 참여해 주셔서 고맙습니다.', 'ok');
   if (CFG.state !== 'open') return msg('mVerify', errText(CFG.state), 'info');
