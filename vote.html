@@ -138,6 +138,7 @@ footer a{color:var(--sub)}
         <button class="btn big" id="bVerify" type="submit">투표 시작</button>
       </form>
       <div id="mVerify"></div>
+      <button type="button" class="btn hidden" id="bEditV" style="margin-top:10px">✏️ 투표 수정하기</button>
     </div>
 
     <details class="card more" id="guideBox">
@@ -187,6 +188,7 @@ footer a{color:var(--sub)}
       <div class="big">✓</div>
       <h2 style="margin-top:12px" id="doneTitle">투표가 끝났어요</h2>
       <p class="hint">마감 전까지는 같은 개인번호로 다시 들어와 고칠 수 있어요. 참여해 주셔서 고맙습니다. 결과는 다면평가관리위원회에서 확인한 뒤 안내해 드려요.</p>
+      <button type="button" class="btn ghost" id="bEditD" style="margin-bottom:10px">✏️ 투표 수정하기</button>
       <a class="btn" href="jr.html" style="text-decoration:none;text-align:center">이어서 정량평가·자기실적평가서 입력하기 (12/4까지)</a>
     </div>
   </section>
@@ -299,7 +301,7 @@ async function boot() {
 // 숫자만 남긴다 (E 를 같이 쳐도 지워짐)
 $('nid').addEventListener('input', () => { const v = $('nid').value.replace(/\D/g, '').slice(0, 9); if (v !== $('nid').value) $('nid').value = v; });
 $('fVerify').addEventListener('submit', async (e) => {
-  e.preventDefault(); msg('mVerify', '');
+  e.preventDefault(); msg('mVerify', ''); show('bEditV', false);
   const digits = $('nid').value.replace(/\D/g, '');
   if (digits.length !== 9) return msg('mVerify', ERR.nid);
   const nid = 'E' + digits;
@@ -310,12 +312,22 @@ $('fVerify').addEventListener('submit', async (e) => {
   if (r.result.voted && !r.result.editable) return msg('mVerify', '이미 투표를 마친 번호예요. 고치시려면 교무기획부에 알려 주세요.', 'ok');
   if (CFG.state !== 'open') return msg('mVerify', errText(CFG.state), 'info');
   TOKEN = r.result.token; REGULAR = !!r.result.regular; $('nid').value = '';
-  EDIT = !!r.result.voted; renderQs(); if (EDIT) fillPrev(r.result.prev || {});
-  show('stepVerify', false); show('stepBallot'); window.scrollTo({ top: $('stepBallot').offsetTop - 12, behavior: 'smooth' });
+  if (r.result.voted) { PREV = r.result.prev || {}; msg('mVerify', '투표를 완료했습니다. 참여해 주셔서 고맙습니다. 고치시려면 아래 단추를 눌러 주세요(마감 전까지).', 'ok'); show('bEditV'); return; }
+  startBallot(false, null); show('stepBallot'); window.scrollTo({ top: $('stepBallot').offsetTop - 12, behavior: 'smooth' });
 });
 
 // 번호가 T 로 시작하는 문항 = 전보 회신(정규교사만, 이름과 함께 저장)
-let REGULAR = false, EDIT = false;
+let REGULAR = false, EDIT = false, PREV = null;
+// 투표지 열기: edit 이면 지난 답을 채운다
+function startBallot(edit, prev) {
+  EDIT = edit; msg('mBallot', ''); msg('mConfirm', ''); renderQs(); if (edit) fillPrev(prev || {});
+  show('bEditV', false); show('stepVerify', false); show('stepDone', false); show('stepConfirm', false); show('stepBallot');
+  window.scrollTo({ top: $('stepBallot').offsetTop - 12, behavior: 'smooth' });
+}
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'bEditV') startBallot(true, PREV);
+  if (e.target.id === 'bEditD') { if (!TOKEN) { show('stepDone', false); show('stepVerify'); return msg('mVerify', '본인 확인을 다시 해 주세요.', 'info'); } startBallot(true, PREV); }
+});
 function openDuty() { const w = window.open('duty.html', 'duty', 'width=1000,height=800,scrollbars=yes,resizable=yes'); if (!w) location.href = 'duty.html'; }
 // 상피제 자녀 문항(T2·T3)은 전보내신 희망자(만기·희망·관외·전과)만 — 11/26
 const JB_APPLY = /만기|희망|관외|전과/;
@@ -425,7 +437,7 @@ $('bSubmit').addEventListener('click', async () => {
     if (['token', 'expired'].includes(r.error)) { show('stepConfirm', false); show('stepVerify'); msg('mVerify', errText(r.error)); }
     return;
   }
-  TOKEN = ''; show('stepConfirm', false); show('stepDone');
+  PREV = ANS; show('stepConfirm', false); show('stepDone');
   if (r.result.edited) $('doneTitle').textContent = '투표를 고쳤어요'; else { CFG.voted++; head(CFG); }
 });
 
