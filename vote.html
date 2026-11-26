@@ -58,6 +58,7 @@ footer a{color:var(--sub)}
 .opt input.custom:disabled{opacity:.45}
 .q .desc{white-space:pre-line}
 .pick-sel{display:block;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:6px 0 4px}
+.jbhead{margin:22px 0 4px;padding:12px 14px;border-radius:10px;background:var(--warnbg);font-size:13.5px;line-height:1.6;word-break:keep-all}.jbhead b{color:var(--warn)}.jbhead>b{display:block;font-size:15px;margin-bottom:4px}
 .pick-sel:focus{outline:2px solid var(--brand);border-color:var(--brand)}
 .q.grid .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8px}
 @media(min-width:560px){.q.grid .opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -293,17 +294,29 @@ $('fVerify').addEventListener('submit', async (e) => {
   if (!r.ok) return msg('mVerify', errText(r.error));
   if (r.result.voted) return msg('mVerify', '이미 투표를 마친 번호예요. 참여해 주셔서 고맙습니다.', 'ok');
   if (CFG.state !== 'open') return msg('mVerify', errText(CFG.state), 'info');
-  TOKEN = r.result.token; $('nid').value = '';
+  TOKEN = r.result.token; REGULAR = !!r.result.regular; $('nid').value = '';
   renderQs(); show('stepVerify', false); show('stepBallot'); window.scrollTo({ top: $('stepBallot').offsetTop - 12, behavior: 'smooth' });
 });
 
+// 번호가 T 로 시작하는 문항 = 전보 회신(정규교사만, 이름과 함께 저장)
+let REGULAR = false;
+const isJb = (q) => /^T/i.test(String(q.no));
+const QS = () => CFG.questions.filter((q) => !isJb(q) || REGULAR);
 function renderQs() {
-  $('qs').innerHTML = CFG.questions.map((q) => {
-    const h = `<h3><span class="no">${esc(q.no)}.</span>${esc(q.title)}${q.required ? '<span class="req">필수</span>' : ''}</h3>` + (q.desc ? `<p class="desc">${esc(q.desc)}</p>` : '');
+  let jbHead = false;
+  $('qs').innerHTML = QS().map((q) => {
+    let pre = '';
+    if (isJb(q) && !jbHead) { jbHead = true; pre = `<div class="jbhead"><b>추가 문항 · 전보 회신 (정규교사만)</b><span>아래 문항은 2027. 3. 1.자 전보 업무를 위한 회신입니다. 위의 다면평가자 추천(무기명)과는 따로, <b>선생님 이름과 함께</b> 저장됩니다. 쪽지로 이미 회신하셨어도 한 번 더 골라 주세요.</span></div>`; }
+    return pre + qHtml(q);
+  }).join('');
+  bindQs();
+}
+function qHtml(q) {
+    const h = `<h3><span class="no">${esc(String(q.no).replace(/^T/i, '전보 '))}.</span>${esc(q.title)}${q.required ? '<span class="req">필수</span>' : ''}</h3>` + (q.desc ? `<p class="desc">${esc(q.desc)}</p>` : '');
     if (q.kind === 'text') return `<div class="q" data-no="${esc(q.no)}">${h}<textarea rows="3" maxlength="1000" data-no="${esc(q.no)}"></textarea></div>`;
     const type = q.kind === 'multi' ? 'checkbox' : 'radio';
     const note = q.kind === 'multi' ? `<p class="desc">여러 개 고를 수 있어요${q.max ? ` (최대 ${q.max}개)` : ''}.</p>` : '';
-    const grid = q.kind === 'single' && q.options.length >= 5 && !(q.details || []).some((d) => d && d.indexOf('【') >= 0);
+    const grid = !isJb(q) && q.kind === 'single' && q.options.length >= 5 && !(q.details || []).some((d) => d && d.indexOf('【') >= 0);
     // 후보가 많은 문항은 목록(드롭다운)에서 고르게 — 이름이 화면에 펼쳐지지 않도록(11/26 지시)
     if (grid) return `<div class="q" data-no="${esc(q.no)}">${h}<select class="pick-sel" data-no="${esc(q.no)}"><option value="">선생님을 골라 주세요</option>`
       + q.options.map((o, i) => `<option value="${esc(o)}">${esc(o)}${(q.details || [])[i] ? ' (' + esc(q.details[i]) + ')' : ''}</option>`).join('') + '</select></div>';
@@ -312,7 +325,8 @@ function renderQs() {
       + (rich ? richHtml(rich) : ((q.details || [])[i] ? `<small>${esc(q.details[i])}</small>` : ''))
       + (o === CUSTOM ? `<input type="text" class="custom" data-no="${esc(q.no)}" maxlength="60" placeholder="예: 11명" disabled>` : '')
       + `</span></label>`; }).join('') + '</div></div>';
-  }).join('');
+}
+function bindQs() {
   $('qs').querySelectorAll('input[name]').forEach((inp) => inp.addEventListener('change', () => {
     const box = inp.closest('.q'), q = CFG.questions.find((x) => x.no === box.dataset.no);
     if (q.kind === 'multi' && inp.checked) {
@@ -328,7 +342,7 @@ function renderQs() {
 
 function collect() {
   const a = {};
-  for (const q of CFG.questions) {
+  for (const q of QS()) {
     if (q.kind === 'text') a[q.no] = $('qs').querySelector(`textarea[data-no="${CSS.escape(q.no)}"]`).value.trim();
     else {
       const sel = $('qs').querySelector(`select[data-no="${CSS.escape(q.no)}"]`);
@@ -352,9 +366,9 @@ $('fBallot').addEventListener('submit', (e) => {
   const c = collect();
   if (c.err) { msg('mBallot', errText((c.code || 'need') + ':' + c.err)); document.querySelector(`.q[data-no="${CSS.escape(c.err)}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
   ANS = c.a;
-  $('sum').innerHTML = CFG.questions.map((q) => {
+  $('sum').innerHTML = QS().map((q) => {
     const v = ANS[q.no]; const t = Array.isArray(v) ? v.join(', ') : v;
-    return `<dt>${esc(q.no)}. ${esc(q.title)}</dt><dd>${t ? esc(t) : '(없음)'}</dd>`;
+    return `<dt>${esc(String(q.no).replace(/^T/i, '전보 '))}. ${esc(q.title)}</dt><dd>${t ? esc(t) : '(없음)'}</dd>`;
   }).join('');
   show('stepBallot', false); show('stepConfirm'); window.scrollTo({ top: $('stepConfirm').offsetTop - 12, behavior: 'smooth' });
 });
@@ -383,7 +397,7 @@ async function loadAdmin() {
   const d = r.result, pct = d.eligible ? Math.round(d.voted / d.eligible * 100) : 0;
   head({ title: '관리자 현황', state: d.state, opensAt: d.opensAt, closesAt: d.closesAt, eligible: d.eligible, voted: d.voted });
   let h = `<div class="card"><h2>참여 현황</h2><div class="tl"><b>${d.voted} / ${d.eligible}명</b><span>${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div>`
-    + `<div class="hint">투표지 ${d.ballots}장 · 아직 투표하지 않은 선생님 ${d.notVoted.length}명</div><div class="chips">${d.notVoted.map((n) => `<span>${esc(n)}</span>`).join('')}</div>`
+    + `<div class="hint">전보 회신 ${d.jbCount || 0}명(시트 「전보 회신」 탭, 기명)</div><div class="hint">투표지 ${d.ballots}장 · 아직 투표하지 않은 선생님 ${d.notVoted.length}명</div><div class="chips">${d.notVoted.map((n) => `<span>${esc(n)}</span>`).join('')}</div>`
     + `<button class="btn ghost" id="bRe" type="button">새로 고침</button></div>`;
   if (d.pick) h += pickHtml(d.pick);
   h += d.questions.map((q) => {
