@@ -137,6 +137,7 @@ table.adm{width:100%;border-collapse:collapse;font-size:13.5px}table.adm td,tabl
 .req{color:var(--bad);font-size:12px;margin-left:4px}
 .mini.fix{margin-top:6px}.mini.fix.on{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}.ro{font-size:15px}
 ul.detail{margin:4px 0 8px;padding:8px 12px 8px 26px;background:var(--bg);border:1px solid var(--line);border-radius:9px;font-size:12.8px;line-height:1.6;color:var(--ink)}ul.detail li{margin:2px 0;word-break:keep-all}ul.detail b{color:var(--brand)}
+.found{font-size:12.5px;color:var(--ok);background:var(--okbg);border-radius:8px;padding:5px 9px;margin:2px 0 4px;word-break:keep-all}
 </style></head>
 <body>
 <div class="wrap">
@@ -300,8 +301,10 @@ function l1Detail() {
   out.push('합계 = 학기별 (구간 점수 × 근무 개월/12)의 합 · 시간표 바뀜·결보강은 반영 안 됨, 다르면 「고치기」');
   return out;
 }
+const evLine = (e) => `구월중학교-${e.no}${e.date ? ' (' + e.date.slice(5).replace('-', '/') + ')' : ''} ${esc(e.title)}`;
 function detailHtml(id) {
   const lines = id === 'L1' ? l1Detail() : (B(id).detail || []).map(esc);
+  if ((id === 'L9' || id === 'W10') && (B(id).ev || []).length) lines.push('<b>내부기안에서 찾은 관련 문서</b>(참고 — 해당하면 문서번호를 적어 주세요): ' + B(id).ev.map(evLine).join(' · '));
   if (id === 'W6') { const w = workAuto(); lines.push(esc(w.note)); }
   return lines.length ? `<ul class="detail">${lines.map((x) => `<li>${x}</li>`).join('')}</ul>` : '';
 }
@@ -333,7 +336,9 @@ function itemHtml(id) {
   if (id === 'W9') {
     const mine = b.comm.map((c) => c.name);
     if (!d.W9.rows.length) d.W9.rows = b.comm.map((c) => ({ name: c.name, as: c.as, on: false, count: '', doc: '' }));
-    const rows = d.W9.rows.map((x, i) => `<div class="cmrow"><label class="chk"><input type="checkbox" data-cm="${i}" data-k="on" ${x.on ? 'checked' : ''}> <b>${esc(x.name)}</b> ${x.as ? `<small>명단상: ${esc(x.as)}</small>` : '<small>직접 추가</small>'}</label>
+    b.comm.forEach((c) => { if (!d.W9.rows.some((x) => x.name === c.name)) d.W9.rows.push({ name: c.name, as: c.as, on: false, count: '', doc: '' }); });
+    const fnd = (nm) => { const c = b.comm.find((y) => y.name === nm); return c && c.found && c.found.length ? `<div class="found">내부기안에 선생님 이름이 나온 회의 <b>${c.found.length}회</b>: ${c.found.map((f) => (f.date ? f.date.slice(5).replace('-', '/') + ' ' : '') + f.docs.map((x) => '구월중학교-' + x).join('/')).join(', ')} — 참석 추정, 실제 참석 횟수로 적어 주세요</div>` : ''; };
+    const rows = d.W9.rows.map((x, i) => `<div class="cmrow"><label class="chk"><input type="checkbox" data-cm="${i}" data-k="on" ${x.on ? 'checked' : ''}> <b>${esc(x.name)}</b> ${x.as ? `<small>명단상: ${esc(x.as)}</small>` : (b.comm.some((y) => y.name === x.name) ? '<small>내부기안에서 찾음</small>' : '<small>직접 추가</small>')}</label>${fnd(x.name)}
       <div class="grid2"><input type="number" min="0" data-cm="${i}" data-k="count" placeholder="참석 횟수" value="${esc(x.count)}"><input type="text" data-cm="${i}" data-k="doc" placeholder="근거(회의록 문서번호 등)" value="${esc(x.doc)}"></div></div>`).join('');
     const others = ST.meta.comm.filter((c) => !d.W9.rows.some((x) => x.name === c));
     return `<div class="it">${head}${detailHtml(id)}<p class="basis">2026 각종위원회 명단에서 선생님 직위·업무로 찾은 위원회예요. <b>3회 이상 활동한 위원회</b>만 체크하고 참석 횟수와 근거를 적어 주세요. 교무기획부가 내부기안으로 다시 확인합니다.</p>${rows || '<p class="hint">명단에서 찾은 위원회가 없어요. 아래에서 추가해 주세요.</p>'}
