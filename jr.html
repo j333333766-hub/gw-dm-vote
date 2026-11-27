@@ -139,6 +139,20 @@ table.adm{width:100%;border-collapse:collapse;font-size:13.5px}table.adm td,tabl
 ul.detail{margin:4px 0 8px;padding:8px 12px 8px 26px;background:var(--bg);border:1px solid var(--line);border-radius:9px;font-size:12.8px;line-height:1.6;color:var(--ink)}ul.detail li{margin:2px 0;word-break:keep-all}ul.detail b{color:var(--brand)}
 .found{font-size:12.5px;color:var(--ok);background:var(--okbg);border-radius:8px;padding:5px 9px;margin:2px 0 4px;word-break:keep-all}
 .autotag{display:inline-block;font-size:12px;font-weight:700;color:var(--brand);background:var(--soft);border-radius:999px;padding:1px 9px;margin:2px 0 4px}
+.tsum{margin:8px 0 12px;padding:14px 16px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
+.tsum-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}.tsum small{display:block;font-size:12.5px;color:var(--sub);font-weight:600}
+.tbig{font-size:34px;line-height:1.1;color:var(--brand);font-weight:800;letter-spacing:-.5px}.tbig span,.tsc b span{font-size:15px;font-weight:600;margin-left:2px;color:var(--sub)}
+.tsc{text-align:right}.tsc b{font-size:20px;font-weight:800;color:var(--ink)}
+.tbar{position:relative;height:10px;border-radius:999px;background:var(--card);border:1px solid var(--line);margin:10px 0 2px;overflow:hidden}.tbar i{position:absolute;left:0;top:0;bottom:0;background:var(--brand);border-radius:999px}
+.tscale{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub)}
+.tsum-sub{font-size:13.5px;margin-top:6px;word-break:keep-all}.t-ok{color:var(--ok)}.t-warn{color:var(--warn)}
+.tlist-h{font-weight:700;font-size:14.5px;margin:4px 0 6px}.tlist-h small{font-weight:500;color:var(--sub);font-size:12.5px;margin-left:4px}
+ol.tlist{list-style:none;margin:0 0 8px;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.trow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line)}.trow:first-child{border-top:0}
+.tno{flex:none;width:22px;height:22px;border-radius:50%;background:var(--soft);color:var(--brand);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.tmain{flex:1;min-width:0}.tname{font-size:14px;font-weight:600;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}.tmeta{font-size:12.3px;color:var(--sub);margin-top:1px;word-break:keep-all}
+.thr{flex:none;font-size:16px;font-weight:800;color:var(--ink);white-space:nowrap}.thr small{font-size:12px;font-weight:600;color:var(--sub);margin-left:1px}
+.tempty{padding:12px;color:var(--sub);font-size:13.5px}
 </style></head>
 <body>
 <div class="wrap">
@@ -383,10 +397,14 @@ function itemHtml(id) {
   if (id === 'L9') return `<div class="it">${head}<p class="basis">${esc(b.basis)}</p>${detailHtml(id)}<label class="chk"><input type="checkbox" data-in="L9.on" ${d.L9.on ? 'checked' : ''}> 전문적학습공동체 수업 공개를 했어요 (0.5점)</label>${d.L9.auto ? AUTOTAG : ''}
       <div class="grid2"><input type="text" data-in="L9.date" placeholder="날짜 예: 6/12" value="${esc(d.L9.date)}"><input type="text" data-in="L9.doc" placeholder="문서번호 예: 구월중학교-12345" value="${esc(d.L9.doc)}"></div>${fixAll(id)}</div>`;
   if (id === 'P2') {
-    const list = b.list.map((t) => `<li>${esc(t.name)} <small>${esc(t.org)} · ${esc(t.end)} · ${t.hours}시간</small></li>`).join('') || '<li class="hint">나이스에 2026. 1. 1. 이후 끝난 직무연수가 없어요</li>';
+    const L = b.list.slice().sort((x, y) => String(x.end).localeCompare(String(y.end)));
+    const rows = L.map((t, i) => `<li class="trow"><span class="tno">${i + 1}</span><div class="tmain"><div class="tname">${esc(t.name)}</div><div class="tmeta">${esc(t.org)} · ${fmtD(t.start)} ~ ${fmtD(t.end)}</div></div><span class="thr">${t.hours}<small>시간</small></span></li>`).join('')
+      || '<li class="tempty">나이스에 2026. 1. 1.~11. 30.에 끝난 직무연수가 없어요</li>';
     const ex = d.extra.map((x, i) => `<div class="exrow"><input type="text" data-ex="${i}" data-k="name" placeholder="연수명" value="${esc(x.name)}"><input type="text" data-ex="${i}" data-k="org" placeholder="연수기관" value="${esc(x.org)}">
       <input type="text" data-ex="${i}" data-k="end" placeholder="이수일 예: 11/20" value="${esc(x.end)}"><input type="number" step="0.5" min="0" data-ex="${i}" data-k="hours" placeholder="시간" value="${esc(x.hours)}"><button type="button" class="mini" data-exdel="${i}">삭제</button></div>`).join('');
-    return `<div class="it">${head}${detailHtml(id)}<p class="basis">${esc(b.basis)}. 40시간이면 만점(4점)이에요. <b>수강 중인 연수는 11. 30.(월)까지 이수를 마쳐 주세요.</b></p><ul class="tl">${list}</ul>
+    return `<div class="it">${head}<div class="tsum" id="p2sum"></div>
+      <div class="tlist-h">나이스 직무연수 이수 내역 <small>${L.length}건 · 2026. 1. 1.~11. 30. 종료 · 자격·기타연수 제외</small></div><ol class="tlist">${rows}</ol>
+      <p class="basis"><b>수강 중인 연수는 11. 30.(월)까지 이수를 마쳐 주세요.</b></p>${detailHtml(id)}
       <div class="sub">나이스에 없는 연수(아직 안 올라간 연수 포함) — 이수증은 아래 「증빙 파일」에 올려 주세요</div>${ex}<button type="button" class="mini add" id="exAdd">+ 연수 추가</button> ${fixAll(id)}</div>`;
   }
   if (id === 'W6') return `<div class="it">${head}<p class="basis" id="w6note"></p>${detailHtml(id)}${fixAll(id)}</div>`;
@@ -429,12 +447,24 @@ function syncHours() {
   ST.sr.hours = parts.join(' / ');
   const el = document.querySelector('[data-sr="hours"]'); if (el) el.value = ST.sr.hours;
 }
+// 직무연수 요약(총 시간·40시간 막대) — 11/27
+const fmtH = (x) => String(Math.round((Number(x) || 0) * 100) / 100);
+function fmtD(s) { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[1]}. ${+m[2]}. ${+m[3]}.` : esc(s || ''); }
+function p2Sum() {
+  const el = $('p2sum'); if (!el) return;
+  const nh = Number(B('P2').hours) || 0, eh = ST.data.extra.reduce((a, x) => a + (Number(x.hours) || 0), 0), tot = nh + eh, pct = Math.min(100, tot / 40 * 100);
+  el.innerHTML = `<div class="tsum-top"><div><small>2026. 1. 1. ~ 11. 30. 내 직무연수 합계</small><b class="tbig">${fmtH(tot)}<span>시간</span></b></div><div class="tsc"><small>점수</small><b>${itemScore('P2')}<span> / 4</span></b></div></div>`
+    + `<div class="tbar"><i style="width:${pct}%"></i></div><div class="tscale"><span>0</span><span>40시간 (만점)</span></div>`
+    + `<div class="tsum-sub">나이스 ${L_n()}건 ${fmtH(nh)}시간${eh ? ` + 직접 추가 ${fmtH(eh)}시간` : ''} · ${tot >= 40 ? '<b class="t-ok">40시간 이상 — 만점</b>' : `<b class="t-warn">40시간까지 ${fmtH(40 - tot)}시간 남음</b>`}</div>`;
+}
+function L_n() { return (B('P2').list || []).length; }
 function recalc() {
   for (const a of AREA) {
     for (const id of a.items) { const el = $('sc_' + id); if (el) { const v = itemScore(id); el.textContent = v ? `+${v}` : '0'; el.className = 'sc' + (v ? ' pos' : ''); } }
     $('as_' + a.key).textContent = `${areaScore(a)} / ${a.max}`;
   }
   const w = $('w6note'); if (w) w.textContent = workAuto().note;
+  p2Sum();
   $('sumgrid').innerHTML = AREA.map((a) => `<div><small>${a.title}</small><b>${areaScore(a)}</b></div>`).join('') + `<div class="tot"><small>총점</small><b>${total()}</b></div>`;
 }
 function setPath(obj, path, val) { const p = path.split('.'); let o = obj; for (let i = 0; i < p.length - 1; i++) o = o[p[i]]; o[p[p.length - 1]] = val; }
