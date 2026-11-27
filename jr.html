@@ -310,25 +310,28 @@ const isPreview = () => !!(ST && ST.openAt && Date.now() < ST.openAt);
 function lockPreview() {
   if (!isPreview()) return;
   document.querySelectorAll('#main input, #main textarea, #main select, #main button').forEach((el) => {
-    if (el.matches('[data-ovt]')) { el.disabled = false; el.onclick = previewPop; return; }
+    if (el.matches('[data-ovt]') || el.id === 'exAdd') { el.disabled = false; el.onclick = () => previewPop(el.dataset.ovt === 'P2' || el.id === 'exAdd'); return; }
     el.disabled = true;
   });
   const o = new Date(ST.openAt);
-  msg('mSave', `지금은 미리 보기 기간이에요. ${o.getMonth() + 1}. ${o.getDate()}.(화) ${String(o.getHours()).padStart(2, '0')}:${String(o.getMinutes()).padStart(2, '0')}부터 고치기·입력·제출, 정량평가표(엑셀)·자기실적평가서(한글) 내려받기를 할 수 있어요. 그 전까지 내용을 살펴보시고, 이상하거나 빠진 부분은 조창현에게 아이스톡 쪽지로 알려 주세요.`, 'info');
+  msg('mSave', `지금은 미리 보기 기간이에요. ${o.getMonth() + 1}. ${o.getDate()}.(화) ${String(o.getHours()).padStart(2, '0')}:${String(o.getMinutes()).padStart(2, '0')}부터 고치기·입력·제출, 정량평가표(엑셀)·자기실적평가서(한글) 내려받기를 할 수 있어요. 그 전까지 내용을 살펴보시고, 이상하거나 빠진 부분은 조창현에게 아이스톡 쪽지로 알려 주세요(직무연수는 12/1부터 본인이 직접 추가).`, 'info');
 }
 // 미리 보기 기간에 「고치기」를 누르면 안내 창(11/27)
-function previewPop() {
+function previewPop(train) {
   let ov = document.getElementById('pvPop');
   if (!ov) {
     ov = document.createElement('div'); ov.id = 'pvPop';
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px';
     ov.innerHTML = '<div role="dialog" aria-modal="true" style="background:#fff;color:#222;max-width:420px;width:100%;border-radius:14px;padding:22px 20px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center;line-height:1.6">'
       + '<div style="font-size:17px;font-weight:700;margin-bottom:8px">12/1(화)부터 수정 가능합니다.</div>'
-      + '<div style="font-size:15px">그 전까지 수정사항이 있으면<br><b>조창현</b>에게 <b>아이스톡 쪽지</b>로 알려 주세요.</div>'
+      + '<div style="font-size:15px" id="pvPopTx"></div>'
       + '<button type="button" id="pvPopOk" style="margin-top:16px;padding:9px 28px;font-size:15px;border:0;border-radius:8px;background:#2f6fde;color:#fff;cursor:pointer">확인</button></div>';
     ov.addEventListener('click', (e) => { if (e.target === ov || e.target.id === 'pvPopOk') ov.style.display = 'none'; });
     document.body.appendChild(ov);
   }
+  document.getElementById('pvPopTx').innerHTML = train
+    ? '직무연수는 나이스 연수 이력이 자동으로 들어가요.<br>나이스에 없는 연수는 <b>12/1(화)부터 직접 「+ 연수 추가」</b>로 넣어 주세요.'
+    : '그 전까지 수정사항이 있으면<br><b>조창현</b>에게 <b>아이스톡 쪽지</b>로 알려 주세요.';
   ov.style.display = 'flex';
   const b = document.getElementById('pvPopOk'); if (b) b.focus();
 }
